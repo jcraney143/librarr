@@ -1,2 +1,11 @@
 # GitHub language detection overrides
 go.sum linguist-generated
+
+# Force LF for anything that runs inside the Linux container, regardless of
+# the checkout platform's core.autocrlf. Without this, a Windows checkout
+# (autocrlf=true, the Git-for-Windows default) silently rewrites
+# entrypoint.sh to CRLF, and the container fails at startup with
+# "exec /usr/local/bin/entrypoint.sh: no such file or directory" - the
+# classic symptom of a CRLF-mangled shebang line, not a missing file.
+*.sh text eol=lf
+Dockerfile text eol=lf
