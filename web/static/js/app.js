@@ -66,8 +66,18 @@ const I18N = {
     no_results_hint: 'Try different keywords or check your spelling',
     nav_discover: 'Discover',
     discover_placeholder: 'Search for books to discover...',
-    discover_empty_title: 'Find your next read',
-    discover_empty_hint: 'Search by title or author to browse and request books',
+    discover_genre_heading: 'Popular in {genre}',
+    discover_genre_failed: 'Failed to load this genre',
+    genre_fiction: 'Fiction',
+    genre_fantasy: 'Fantasy',
+    genre_mystery: 'Mystery',
+    genre_science_fiction: 'Sci-Fi',
+    genre_romance: 'Romance',
+    genre_biography: 'Biography',
+    genre_history: 'History',
+    genre_young_adult: 'Young Adult',
+    genre_horror: 'Horror',
+    genre_thriller: 'Thriller',
     request_button: 'Request',
     requesting: 'Requesting...',
     requested_badge: 'Requested',
@@ -75,6 +85,11 @@ const I18N = {
     request_failed: 'Request failed: {msg}',
     already_requested: '"{title}" has already been requested',
     discover_detail_error: 'Failed to load book details',
+    watch_button: 'Watch',
+    watching_badge: 'Watching',
+    watch_author_button: 'Watch {author} for new releases',
+    author_watch_added: 'Watching {author} for new releases',
+    author_watch_failed: 'Failed to watch author',
     download: 'Download',
     download_added: 'Added',
     download_failed_state: 'Failed',
@@ -285,8 +300,18 @@ const I18N = {
     no_results_hint: 'Попробуйте другие ключевые слова или проверьте написание',
     nav_discover: 'Обзор',
     discover_placeholder: 'Найти книги для просмотра...',
-    discover_empty_title: 'Найдите свою следующую книгу',
-    discover_empty_hint: 'Ищите по названию или автору, чтобы просматривать и запрашивать книги',
+    discover_genre_heading: 'Популярное в жанре «{genre}»',
+    discover_genre_failed: 'Не удалось загрузить этот жанр',
+    genre_fiction: 'Художественная литература',
+    genre_fantasy: 'Фэнтези',
+    genre_mystery: 'Детектив',
+    genre_science_fiction: 'Фантастика',
+    genre_romance: 'Романтика',
+    genre_biography: 'Биография',
+    genre_history: 'История',
+    genre_young_adult: 'Young Adult',
+    genre_horror: 'Ужасы',
+    genre_thriller: 'Триллер',
     request_button: 'Запросить',
     requesting: 'Запрос...',
     requested_badge: 'Запрошено',
@@ -294,6 +319,11 @@ const I18N = {
     request_failed: 'Ошибка запроса: {msg}',
     already_requested: '«{title}» уже запрошено',
     discover_detail_error: 'Не удалось загрузить информацию о книге',
+    watch_button: 'Следить',
+    watching_badge: 'Отслеживается',
+    watch_author_button: 'Следить за новинками автора {author}',
+    author_watch_added: 'Отслеживание новинок автора {author}',
+    author_watch_failed: 'Не удалось начать отслеживание автора',
     download: 'Скачать',
     download_added: 'Добавлено',
     download_failed_state: 'Ошибка',
@@ -991,6 +1021,7 @@ function switchTab(tab) {
   else stopDownloadPolling();
   if (tab === 'wishlist') loadWishlist();
   if (tab === 'settings') loadSettings();
+  if (tab === 'discover') loadDiscoverIfEmpty();
 }
 
 function switchSearchTab(tab) {
@@ -1728,10 +1759,20 @@ let discoverAbort = null;
 let discoverGeneration = 0;
 state.discoverResults = [];
 state.discoverRequesting = new Set(); // source_id currently being requested
+state.discoverWatching = new Set(); // source_id currently being added to the wishlist
+state.discoverGenre = 'fiction'; // active browse chip; null while a search query is active
+
+const DISCOVER_GENRES = ['fiction', 'fantasy', 'mystery', 'science_fiction', 'romance', 'biography', 'history', 'young_adult', 'horror', 'thriller'];
 
 document.getElementById('discover-input').addEventListener('input', (e) => {
   clearTimeout(discoverTimeout);
   const q = e.target.value.trim();
+  if (q.length === 0) {
+    // Cleared back to nothing typed - fall back to browsing instead of
+    // leaving the last search's results stranded on screen.
+    browseDiscoverGenre(state.discoverGenre || 'fiction');
+    return;
+  }
   if (q.length < 2) return;
   discoverTimeout = setTimeout(() => doDiscoverSearch(q), 300);
 });
@@ -1744,26 +1785,61 @@ document.getElementById('discover-input').addEventListener('keydown', (e) => {
   }
 });
 
+// Loads the default browse row the first time Discover is opened. Cheap to
+// call on every tab switch - it's a no-op once there's already something on
+// screen (a search or a browsed genre).
+function loadDiscoverIfEmpty() {
+  renderDiscoverGenreChips();
+  if (state.discoverResults.length === 0 && !document.getElementById('discover-input').value.trim()) {
+    browseDiscoverGenre(state.discoverGenre || 'fiction');
+  }
+}
+
+function renderDiscoverGenreChips() {
+  document.getElementById('discover-genres').innerHTML = DISCOVER_GENRES.map(g => `
+    <button data-action="browseDiscoverGenre" data-genre="${g}" class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${state.discoverGenre === g ? 'bg-indigo-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'}">${escapeHtml(t(`genre_${g}`))}</button>
+  `).join('');
+}
+
 async function doDiscoverSearch(query) {
+  state.discoverGenre = null;
+  renderDiscoverGenreChips();
+  document.getElementById('discover-section-title').classList.add('hidden');
+  await fetchDiscoverResults(`/api/discover/search?q=${encodeURIComponent(query)}`, err =>
+    showToast(t('search_failed', { msg: err.message }), 'error'));
+}
+
+async function browseDiscoverGenre(subject) {
+  document.getElementById('discover-input').value = '';
+  state.discoverGenre = subject;
+  renderDiscoverGenreChips();
+  const titleEl = document.getElementById('discover-section-title');
+  titleEl.textContent = t('discover_genre_heading', { genre: t(`genre_${subject}`) });
+  titleEl.classList.remove('hidden');
+  await fetchDiscoverResults(`/api/discover/genre/${encodeURIComponent(subject)}`, () =>
+    showToast(t('discover_genre_failed'), 'error'));
+}
+
+// Shared fetch/render/error-state plumbing for both discover flows (search
+// and genre-browse) - same abort/generation guarding either way, only the
+// URL and the error toast wording differ.
+async function fetchDiscoverResults(url, onError) {
   if (discoverAbort) discoverAbort.abort();
   discoverAbort = new AbortController();
   const gen = ++discoverGeneration;
 
   document.getElementById('discover-spinner').classList.remove('hidden');
-  document.getElementById('discover-empty').classList.add('hidden');
   document.getElementById('discover-no-results').classList.add('hidden');
 
   try {
-    const data = await apiJson(`/api/discover/search?q=${encodeURIComponent(query)}`, { signal: discoverAbort.signal });
-    if (gen !== discoverGeneration) return; // a newer search superseded this one
+    const data = await apiJson(url, { signal: discoverAbort.signal });
+    if (gen !== discoverGeneration) return; // a newer request superseded this one
     state.discoverResults = data.results || [];
     renderDiscoverResults();
     document.getElementById('discover-no-results').classList.toggle('hidden', state.discoverResults.length > 0);
   } catch (err) {
     if (err.name === 'AbortError') return;
-    if (err.message !== 'Unauthorized') {
-      showToast(t('search_failed', { msg: err.message }), 'error');
-    }
+    if (err.message !== 'Unauthorized') onError(err);
   } finally {
     if (gen === discoverGeneration) {
       document.getElementById('discover-spinner').classList.add('hidden');
@@ -1785,7 +1861,9 @@ function renderDiscoverCard(result, index) {
     ? `<span class="absolute top-2 right-2 px-2 py-0.5 rounded text-xs font-medium bg-emerald-600 text-white">${escapeHtml(t('in_library'))}</span>`
     : (result.requested
       ? `<span class="absolute top-2 right-2 px-2 py-0.5 rounded text-xs font-medium bg-amber-600 text-white">${escapeHtml(t('requested_badge'))}</span>`
-      : '');
+      : (result.watching
+        ? `<span class="absolute top-2 right-2 px-2 py-0.5 rounded text-xs font-medium bg-sky-600 text-white">${escapeHtml(t('watching_badge'))}</span>`
+        : ''));
 
   const srcLabel = result.source === 'google_books' ? 'Google Books' : 'Open Library';
 
@@ -1861,16 +1939,35 @@ function renderDiscoverModalActions(result) {
     el.innerHTML = `<span class="inline-block px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 text-sm font-medium">${escapeHtml(t('in_library'))}</span>`;
     return;
   }
-  if (result.requested) {
-    el.innerHTML = `<span class="inline-block px-3 py-1.5 rounded-lg bg-amber-600/20 text-amber-400 text-sm font-medium">${escapeHtml(t('requested_badge'))}</span>`;
-    return;
-  }
+
   const key = `${result.source}:${result.source_id}`;
   const requesting = state.discoverRequesting.has(key);
+  const requestBtn = result.requested
+    ? `<span class="inline-block px-3 py-1.5 rounded-lg bg-amber-600/20 text-amber-400 text-sm font-medium">${escapeHtml(t('requested_badge'))}</span>`
+    : `<button data-action="requestDiscoverBook" ${requesting ? 'disabled aria-busy="true"' : ''} class="px-4 py-2 rounded-lg text-sm font-medium transition-colors ${requesting ? 'bg-indigo-500/70 text-white cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}">
+        ${requesting ? escapeHtml(t('requesting')) : escapeHtml(t('request_button'))}
+      </button>`;
+
+  // Watch: add to the wishlist so a title with no current indexer hit (an
+  // unreleased book, an out-of-print one) still has somewhere to land - the
+  // wishlist already tolerates that today, no new table needed.
+  const watching = state.discoverWatching.has(key);
+  const watchBtn = result.watching
+    ? `<span class="inline-block px-3 py-1.5 rounded-lg bg-sky-600/20 text-sky-400 text-sm font-medium">${escapeHtml(t('watching_badge'))}</span>`
+    : `<button data-action="watchDiscoverBook" ${watching ? 'disabled aria-busy="true"' : ''} class="px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${watching ? 'border-slate-700 text-slate-500 cursor-not-allowed' : 'border-slate-600 text-slate-200 hover:bg-slate-800'}">
+        ${watching ? escapeHtml(t('requesting')) : escapeHtml(t('watch_button'))}
+      </button>`;
+
+  // Watch author: admin-only, mirrors the existing admin-gated
+  // POST /api/authors/monitor - surfaces a previously headless backend
+  // feature rather than adding a new one.
+  const watchAuthorBtn = (state.currentRole === 'admin' && result.author)
+    ? `<button data-action="watchDiscoverAuthor" class="block mt-2 text-xs text-slate-500 hover:text-slate-300 underline underline-offset-2">${escapeHtml(t('watch_author_button', { author: result.author }))}</button>`
+    : '';
+
   el.innerHTML = `
-    <button data-action="requestDiscoverBook" ${requesting ? 'disabled aria-busy="true"' : ''} class="w-full sm:w-auto px-4 py-2 rounded-lg text-sm font-medium transition-colors ${requesting ? 'bg-indigo-500/70 text-white cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}">
-      ${requesting ? escapeHtml(t('requesting')) : escapeHtml(t('request_button'))}
-    </button>`;
+    <div class="flex flex-wrap gap-2">${requestBtn}${watchBtn}</div>
+    ${watchAuthorBtn}`;
 }
 
 function hideDiscoverModal() {
@@ -1905,12 +2002,7 @@ async function requestDiscoverBook() {
       result.requested = true;
       result.request_id = data.request?.id;
       showToast(t('request_sent', { title: result.title }), 'success');
-      // Reflect on the grid card too, not just the modal, without a re-search.
-      const idx = state.discoverResults.findIndex(r => r.source === result.source && r.source_id === result.source_id);
-      if (idx !== -1) {
-        state.discoverResults[idx].requested = true;
-        renderDiscoverResults();
-      }
+      reflectDiscoverFlag(result, 'requested');
     }
   } catch (err) {
     if (err.message !== 'Unauthorized') {
@@ -1919,6 +2011,53 @@ async function requestDiscoverBook() {
   } finally {
     state.discoverRequesting.delete(key);
     renderDiscoverModalActions(result);
+  }
+}
+
+// Mirrors the grid card's flag to match the modal's, without a re-search -
+// shared by requestDiscoverBook and watchDiscoverBook.
+function reflectDiscoverFlag(result, flag) {
+  const idx = state.discoverResults.findIndex(r => r.source === result.source && r.source_id === result.source_id);
+  if (idx !== -1) {
+    state.discoverResults[idx][flag] = true;
+    renderDiscoverResults();
+  }
+}
+
+async function watchDiscoverBook() {
+  const result = state.discoverDetailResult;
+  if (!result) return;
+  const key = `${result.source}:${result.source_id}`;
+  state.discoverWatching.add(key);
+  renderDiscoverModalActions(result);
+
+  try {
+    await apiJson('/api/wishlist', {
+      method: 'POST',
+      body: JSON.stringify({ title: result.title, author: result.author || '', media_type: 'ebook' }),
+    });
+    result.watching = true;
+    showToast(t('added_to_wishlist'), 'success');
+    reflectDiscoverFlag(result, 'watching');
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('failed_add_wishlist'), 'error');
+  } finally {
+    state.discoverWatching.delete(key);
+    renderDiscoverModalActions(result);
+  }
+}
+
+async function watchDiscoverAuthor() {
+  const result = state.discoverDetailResult;
+  if (!result || !result.author) return;
+  try {
+    await apiJson('/api/authors/monitor', {
+      method: 'POST',
+      body: JSON.stringify({ name: result.author }),
+    });
+    showToast(t('author_watch_added', { author: result.author }), 'success');
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('author_watch_failed'), 'error');
   }
 }
 
@@ -3063,6 +3202,9 @@ const CLICK_ACTIONS = {
   openDiscoverDetail: el => openDiscoverDetail(+el.dataset.idx),
   hideDiscoverModal: () => hideDiscoverModal(),
   requestDiscoverBook: () => requestDiscoverBook(),
+  watchDiscoverBook: () => watchDiscoverBook(),
+  watchDiscoverAuthor: () => watchDiscoverAuthor(),
+  browseDiscoverGenre: el => browseDiscoverGenre(el.dataset.genre),
   deleteLibraryItem: el => deleteLibraryItem(el.dataset.id, el.dataset.type, el.dataset.title),
   goLibraryPage: el => goLibraryPage(+el.dataset.page),
   searchWishlistItem: el => searchWishlistItem(el.dataset.title, el.dataset.mediaType),

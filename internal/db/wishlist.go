@@ -49,6 +49,18 @@ func (d *DB) GetWishlist() ([]models.WishlistItem, error) {
 	return items, nil
 }
 
+// HasWishlistItemByTitle reports whether a wishlist entry already exists for
+// a title (case-insensitive) - used to badge "watching" in the Discover UI,
+// mirroring FindActiveRequestByTitle's role for the "requested" badge.
+func (d *DB) HasWishlistItemByTitle(title string) (bool, error) {
+	var n int
+	err := d.db.QueryRow("SELECT COUNT(1) FROM wishlist WHERE LOWER(title) = LOWER(?)", title).Scan(&n)
+	if err != nil {
+		return false, err
+	}
+	return n > 0, nil
+}
+
 // DeleteWishlistItem removes a wishlist item by ID.
 func (d *DB) DeleteWishlistItem(id int64) error {
 	d.mu.Lock()

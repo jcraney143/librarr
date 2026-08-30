@@ -293,6 +293,7 @@ func (s *Server) registerSearchRoutes() {
 	// what someone browses before deciding what to Request.
 	s.mux.HandleFunc("GET /api/discover/search", s.handleDiscoverSearch)
 	s.mux.HandleFunc("GET /api/discover/book/{source}/{id}", s.handleDiscoverDetail)
+	s.mux.HandleFunc("GET /api/discover/genre/{subject}", s.handleDiscoverGenre)
 }
 
 // registerDownloadRoutes wires download management and file uploads.

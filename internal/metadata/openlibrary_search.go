@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/JeremiahM37/librarr/internal/models"
 )
@@ -66,6 +67,71 @@ func (c *Client) SearchMulti(ctx context.Context, query string, limit int) ([]mo
 		}
 		if doc.FirstPublishYear > 0 {
 			r.PublishedDate = fmt.Sprintf("%d", doc.FirstPublishYear)
+		}
+		results = append(results, r)
+	}
+	return results, nil
+}
+
+// olSubjectResponse is the shape of https://openlibrary.org/subjects/{subject}.json.
+type olSubjectResponse struct {
+	Works []struct {
+		Key              string `json:"key"`
+		Title            string `json:"title"`
+		CoverID          int    `json:"cover_id"`
+		FirstPublishYear int    `json:"first_publish_year"`
+		Authors          []struct {
+			Name string `json:"name"`
+		} `json:"authors"`
+	} `json:"works"`
+}
+
+// BrowseSubject returns Open Library's list of works for a subject/genre,
+// ordered by its default popularity ranking (highest edition_count first in
+// practice) - what backs the Discover UI's genre-browse rows. Unlike
+// SearchMulti, this is Open-Library-only: Google Books has no equivalent
+// "browse by subject, ranked" endpoint that doesn't require an API key.
+func (c *Client) BrowseSubject(ctx context.Context, subject string, limit int) ([]models.DiscoverResult, error) {
+	reqURL := fmt.Sprintf("https://openlibrary.org/subjects/%s.json?limit=%d", url.PathEscape(subject), limit)
+	req, err := http.NewRequestWithContext(ctx, "GET", reqURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "Librarr/2.0 (book download manager; github.com/JeremiahM37/librarr)")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("HTTP %d", resp.StatusCode)
+	}
+
+	var data olSubjectResponse
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return nil, err
+	}
+
+	results := make([]models.DiscoverResult, 0, len(data.Works))
+	for _, w := range data.Works {
+		if w.Title == "" || w.Key == "" {
+			continue
+		}
+		r := models.DiscoverResult{
+			Source:   "open_library",
+			SourceID: w.Key,
+			Title:    w.Title,
+		}
+		if len(w.Authors) > 0 {
+			r.Author = w.Authors[0].Name
+		}
+		if w.CoverID > 0 {
+			r.CoverURL = fmt.Sprintf("https://covers.openlibrary.org/b/id/%d-M.jpg", w.CoverID)
+		}
+		if w.FirstPublishYear > 0 {
+			r.PublishedDate = fmt.Sprintf("%d", w.FirstPublishYear)
 		}
 		results = append(results, r)
 	}

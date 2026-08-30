@@ -57,6 +57,41 @@ func (s *Server) handleDiscoverDetail(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, results[0])
 }
 
+// discoverGenres is the fixed set of subjects the Discover browse rows
+// offer - kept in sync with the chip list in web/static/js/app.js. A fixed
+// allowlist (rather than passing the path segment straight through to Open
+// Library) keeps this endpoint from doubling as an open proxy for arbitrary
+// openlibrary.org/subjects/* lookups.
+var discoverGenres = map[string]bool{
+	"fiction": true, "fantasy": true, "mystery": true, "science_fiction": true,
+	"romance": true, "biography": true, "history": true, "young_adult": true,
+	"horror": true, "thriller": true,
+}
+
+// handleDiscoverGenre handles GET /api/discover/genre/{subject} — the
+// browse rows shown when Discover has no search query yet.
+func (s *Server) handleDiscoverGenre(w http.ResponseWriter, r *http.Request) {
+	subject := r.PathValue("subject")
+	if !discoverGenres[subject] {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"error": "unknown genre"})
+		return
+	}
+
+	limit := 24
+	if l, err := strconv.Atoi(r.URL.Query().Get("limit")); err == nil && l > 0 && l <= 50 {
+		limit = l
+	}
+
+	results, err := s.discover.BrowseGenre(r.Context(), subject, limit)
+	if err != nil {
+		writeJSON(w, http.StatusBadGateway, map[string]interface{}{"error": "Failed to browse genre"})
+		return
+	}
+	s.annotateDiscoverResults(results)
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{"results": results})
+}
+
 // annotateDiscoverResults marks each result as owned (already in the
 // library) and/or requested (a request already exists), in place. Mirrors
 // annotateOwnership's pattern in ownership.go, but discover results don't
@@ -80,6 +115,9 @@ func (s *Server) annotateDiscoverResults(results []models.DiscoverResult) {
 			results[i].Requested = true
 			results[i].RequestID = req.ID
 			results[i].RequestStatus = req.Status
+		}
+		if watching, err := s.db.HasWishlistItemByTitle(results[i].Title); err == nil && watching {
+			results[i].Watching = true
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 )
@@ -16,9 +17,26 @@ type MonitoredAuthor struct {
 	CheckIntervalDays int       `json:"check_interval_days"`
 }
 
+// AddMonitoredAuthor adds an author to watch for new releases. Idempotent
+// on name (case-insensitive): calling it again for an author already being
+// monitored returns the existing row instead of creating a duplicate that
+// the scheduler would then poll and notify on twice. This matters more now
+// that the Discover UI's "Watch this author" button can call it repeatedly
+// for the same author across separate book cards, not just the occasional
+// manual add it was originally written for.
 func (d *DB) AddMonitoredAuthor(name string, intervalDays int) (int64, error) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
+
+	var existingID int64
+	err := d.db.QueryRow("SELECT id FROM monitored_authors WHERE LOWER(name) = LOWER(?)", name).Scan(&existingID)
+	if err == nil {
+		return existingID, nil
+	}
+	if err != sql.ErrNoRows {
+		return 0, err
+	}
+
 	result, err := d.db.Exec(
 		"INSERT INTO monitored_authors (name, check_interval_days) VALUES (?, ?)",
 		name, intervalDays,

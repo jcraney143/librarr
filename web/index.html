@@ -239,11 +239,11 @@
         </div>
       </div>
 
-      <!-- Empty state -->
-      <div id="discover-empty" class="text-center py-16">
-        <h2 class="text-2xl font-bold text-white mb-2" data-i18n="discover_empty_title">Find your next read</h2>
-        <p class="text-slate-400" data-i18n="discover_empty_hint">Search by title or author to browse and request books</p>
-      </div>
+      <!-- Genre browse chips - shown when there's no active search query -->
+      <div id="discover-genres" class="flex flex-wrap gap-2 mb-4"></div>
+
+      <!-- Section title, e.g. "Popular in Fantasy" - hidden while a search is active -->
+      <h3 id="discover-section-title" class="hidden text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3"></h3>
 
       <!-- No results -->
       <div id="discover-no-results" class="hidden text-center py-16">

@@ -32,4 +32,9 @@ type DiscoverResult struct {
 	Requested     bool   `json:"requested"`
 	RequestID     string `json:"request_id,omitempty"`
 	RequestStatus string `json:"request_status,omitempty"`
+
+	// Watching mirrors Requested, but against the wishlist table - set when
+	// someone has already added this title to track for a future release
+	// (see the Discover modal's "Watch" action).
+	Watching bool `json:"watching"`
 }

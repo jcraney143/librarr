@@ -77,6 +77,15 @@ func (s *DiscoverService) Search(ctx context.Context, query string, limit int) [
 	return merged
 }
 
+// BrowseGenre returns a ranked list of works for a subject/genre - what
+// backs the Discover UI's browse rows when there's no search query yet.
+// Open-Library-only (see BrowseSubject) rather than merged with Google
+// Books, so the ranking stays meaningful instead of interleaving two
+// differently-ordered lists.
+func (s *DiscoverService) BrowseGenre(ctx context.Context, subject string, limit int) ([]models.DiscoverResult, error) {
+	return s.openLibrary.BrowseSubject(ctx, subject, limit)
+}
+
 // GetDetail fetches full detail for one result by source+id.
 func (s *DiscoverService) GetDetail(ctx context.Context, source, id string) (*models.DiscoverResult, error) {
 	if source == "open_library" {
