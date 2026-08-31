@@ -77,3 +77,55 @@ func (s *Server) handleDeleteMonitoredAuthor(w http.ResponseWriter, r *http.Requ
 	}
 	writeJSON(w, http.StatusOK, map[string]interface{}{"success": true})
 }
+
+// handleCheckAuthorNow re-checks one monitored author for new releases on
+// demand, bypassing its normal check-interval gate. Backs the "Check now"
+// button on the Calendar tab.
+func (s *Server) handleCheckAuthorNow(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false, "error": "Invalid ID",
+		})
+		return
+	}
+	if s.authorMonitor == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]interface{}{
+			"success": false, "error": "Author monitor not available",
+		})
+		return
+	}
+	if err := s.authorMonitor.CheckAuthorNow(id); err != nil {
+		writeJSON(w, http.StatusNotFound, map[string]interface{}{
+			"success": false, "error": err.Error(),
+		})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]interface{}{"success": true})
+}
+
+// handleListAuthorReleases returns the most recent releases found across
+// all monitored authors, for the Calendar tab's timeline.
+func (s *Server) handleListAuthorReleases(w http.ResponseWriter, r *http.Request) {
+	limit := 50
+	if v := r.URL.Query().Get("limit"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			limit = n
+		}
+	}
+	releases, err := s.db.GetAuthorReleases(limit)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false, "error": "Failed to get author releases",
+		})
+		return
+	}
+	if releases == nil {
+		releases = []db.AuthorRelease{}
+	}
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"success":  true,
+		"releases": releases,
+	})
+}

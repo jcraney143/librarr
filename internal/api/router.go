@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -19,12 +20,29 @@ import (
 	"github.com/JeremiahM37/librarr/internal/scheduler"
 	"github.com/JeremiahM37/librarr/internal/search"
 	"github.com/JeremiahM37/librarr/internal/torznab"
+	"github.com/JeremiahM37/librarr/internal/version"
 	"github.com/JeremiahM37/librarr/internal/webhook"
 	"github.com/JeremiahM37/librarr/web"
 )
 
-// indexHTML holds the embedded web UI.
-var indexHTML = web.IndexHTML
+// indexHTML holds the embedded web UI, with every /static/ asset reference
+// cache-busted to the running version (see versionStaticAssets) - without
+// it, handleStatic's hour-long Cache-Control means an upgraded binary's
+// css/js can take up to an hour to reach a browser that already has the
+// page cached, not just on the next full page load.
+var indexHTML = versionStaticAssets(web.IndexHTML, version.Version)
+
+var staticAssetAttr = regexp.MustCompile(`(src|href)="(/static/[^"?]+)"`)
+
+// versionStaticAssets appends "?v=<version>" to every unversioned /static/
+// asset URL in html, so the URL itself changes on upgrade instead of
+// relying on the client's cache to expire.
+func versionStaticAssets(html []byte, ver string) []byte {
+	if ver == "" {
+		return html
+	}
+	return staticAssetAttr.ReplaceAll(html, []byte(`$1="$2?v=`+ver+`"`))
+}
 
 // Server holds the API dependencies.
 type Server struct {
@@ -325,6 +343,7 @@ func (s *Server) registerLibraryRoutes() {
 	s.mux.HandleFunc("GET /api/library/manga", s.handleLibraryManga)
 	s.mux.HandleFunc("DELETE /api/library/book/{id}", s.handleDeleteBook)
 	s.mux.HandleFunc("DELETE /api/library/audiobook/{id}", s.handleDeleteAudiobook)
+	s.mux.HandleFunc("GET /api/library/duplicates", requireAdmin(s.handleListDuplicates))
 	s.mux.HandleFunc("GET /api/stats", s.handleStats)
 	s.mux.HandleFunc("GET /api/activity", s.handleActivity)
 
@@ -357,6 +376,8 @@ func (s *Server) registerLibraryRoutes() {
 	s.mux.HandleFunc("GET /api/authors", s.handleListMonitoredAuthors)
 	s.mux.HandleFunc("POST /api/authors/monitor", requireAdmin(s.handleAddMonitoredAuthor))
 	s.mux.HandleFunc("DELETE /api/authors/{id}", requireAdmin(s.handleDeleteMonitoredAuthor))
+	s.mux.HandleFunc("POST /api/authors/{id}/check", requireAdmin(s.handleCheckAuthorNow))
+	s.mux.HandleFunc("GET /api/authors/releases", s.handleListAuthorReleases)
 }
 
 // registerRequestRoutes wires the book request workflow and notifications.
@@ -430,6 +451,7 @@ func (s *Server) registerAdminRoutes() {
 	// Webhooks (admin only).
 	s.mux.HandleFunc("GET /api/webhooks", requireAdmin(s.handleGetWebhooks))
 	s.mux.HandleFunc("POST /api/webhooks", requireAdmin(s.handleCreateWebhook))
+	s.mux.HandleFunc("PUT /api/webhooks/{id}", requireAdmin(s.handleUpdateWebhook))
 	s.mux.HandleFunc("DELETE /api/webhooks/{id}", requireAdmin(s.handleDeleteWebhook))
 	s.mux.HandleFunc("POST /api/webhooks/test", requireAdmin(s.handleTestWebhook))
 

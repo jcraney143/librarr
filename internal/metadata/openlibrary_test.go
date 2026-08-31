@@ -11,7 +11,10 @@ func TestTruncate(t *testing.T) {
 		want   string
 	}{
 		{"short", 10, "short"},
-		{"this is a long string", 10, "this is a ..."},
+		// Cuts back to the last word boundary rather than mid-word, and
+		// that trims the trailing space before the cut too - "this is a..."
+		// reads right, "this is a ..." (space then ellipsis) doesn't.
+		{"this is a long string", 10, "this is a..."},
 		{"exact fit!", 10, "exact fit!"},
 		{"", 5, ""},
 	}

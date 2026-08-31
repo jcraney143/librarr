@@ -57,6 +57,20 @@ func (am *AuthorMonitor) CheckAuthors() {
 	}
 }
 
+// CheckAuthorNow immediately checks a single monitored author for new
+// releases, bypassing the normal per-author check-interval gate (and the
+// global AuthorMonitorEnabled toggle - it's an explicit user action from
+// the "Check now" button, not the background loop). Used by
+// POST /api/authors/{id}/check.
+func (am *AuthorMonitor) CheckAuthorNow(id int64) error {
+	author, err := am.db.GetMonitoredAuthorByID(id)
+	if err != nil {
+		return err
+	}
+	am.checkAuthor(*author)
+	return nil
+}
+
 func (am *AuthorMonitor) checkAuthor(author db.MonitoredAuthor) {
 	books, err := am.searchOpenLibrary(author.Name)
 	if err != nil {
@@ -84,6 +98,11 @@ func (am *AuthorMonitor) checkAuthor(author db.MonitoredAuthor) {
 			"title", newest.Title,
 			"year", newest.Year,
 		)
+
+		// Record it in the release history feeding the Calendar tab.
+		if _, err := am.db.RecordAuthorRelease(author.ID, author.Name, newest.Title, newest.Year); err != nil {
+			slog.Warn("failed to record author release", "author", author.Name, "error", err)
+		}
 
 		// Send notification.
 		if am.webhookSender != nil {

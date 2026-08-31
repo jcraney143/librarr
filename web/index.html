@@ -106,6 +106,7 @@
       </div>
       <p id="discover-modal-description" class="text-sm text-slate-400 whitespace-pre-line"></p>
       <div id="discover-modal-actions" class="mt-5"></div>
+      <div id="discover-modal-recommended" class="hidden mt-5 pt-4 border-t border-slate-800"></div>
     </div>
   </div>
 </div>
@@ -163,6 +164,13 @@
         </button>
         <button data-action="switchTab" data-arg="wishlist" class="nav-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors whitespace-nowrap" data-tab="wishlist">
           <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg><span data-i18n="nav_wishlist">Wishlist</span>
+        </button>
+        <button data-action="switchTab" data-arg="requests" class="nav-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors whitespace-nowrap relative" data-tab="requests">
+          <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span data-i18n="nav_requests">Requests</span>
+          <span id="requests-badge" class="hidden ml-1 px-1.5 py-0.5 text-xs bg-indigo-600 text-white rounded-full"></span>
+        </button>
+        <button data-action="switchTab" data-arg="calendar" class="nav-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors whitespace-nowrap" data-tab="calendar">
+          <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span data-i18n="nav_calendar">Calendar</span>
         </button>
         <button data-action="switchTab" data-arg="settings" class="nav-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors whitespace-nowrap" data-tab="settings">
           <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span data-i18n="nav_settings">Settings</span>
@@ -323,6 +331,63 @@
       </div>
     </div>
 
+    <!-- ==================== REQUESTS TAB ==================== -->
+    <!-- Admin approval queue for the existing Discover "Request" workflow -
+         the backend (approve/cancel/retry/select/delete + the search+
+         download pipeline) already existed with no UI anywhere to reach
+         it, so a submitted request had no visible next step. -->
+    <div id="tab-requests" class="tab-content">
+      <div class="flex items-center justify-between mb-4 gap-2 flex-wrap">
+        <h2 class="text-xl font-bold text-white" data-i18n="requests_title">Requests</h2>
+        <div class="flex gap-2">
+          <button data-action="switchRequestsFilter" data-arg="pending" class="req-filter active px-3 py-1.5 text-sm font-medium rounded-lg bg-indigo-600 text-white transition-colors" data-filter="pending" data-i18n="req_filter_pending">Pending</button>
+          <button data-action="switchRequestsFilter" data-arg="" class="req-filter px-3 py-1.5 text-sm font-medium rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-colors" data-filter="" data-i18n="req_filter_all">All</button>
+        </div>
+      </div>
+      <div id="requests-empty" class="hidden text-center py-16">
+        <h2 class="text-2xl font-bold text-white mb-2" data-i18n="requests_empty">No requests</h2>
+        <p class="text-slate-400" data-i18n="requests_empty_hint">Requested books from Discover will show up here.</p>
+      </div>
+      <div id="requests-list" class="space-y-3"></div>
+    </div>
+
+    <!-- ==================== CALENDAR TAB ==================== -->
+    <!-- Ties together two previously-headless backend features: author
+         monitoring (track an author, get notified on new releases) and
+         series-gap detection. Neither source publishes reliable future
+         release dates, so this is a release timeline + tracking panel
+         rather than a forward-looking month grid. -->
+    <div id="tab-calendar" class="tab-content">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6">
+        <div class="flex items-start justify-between mb-4 gap-3">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wide" data-i18n="cal_authors_title">Tracked Authors</h3>
+            <p class="text-xs text-slate-500 mt-1" data-i18n="cal_authors_desc">Follow an author to get notified when a new book is found.</p>
+          </div>
+        </div>
+        <div id="author-add-form" class="hidden flex flex-wrap gap-2 mb-4">
+          <div class="flex-1 min-w-[220px]"><input id="new-author-name" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500" placeholder="Author name" data-i18n-placeholder="ph_author_name"></div>
+          <button data-action="addTrackedAuthor" class="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors" data-i18n="cal_track_btn">Track</button>
+        </div>
+        <div id="authors-empty" class="hidden text-center py-8 text-sm text-slate-500" data-i18n="cal_authors_empty">Not tracking any authors yet.</div>
+        <div id="tracked-authors-list" class="space-y-2"></div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6">
+        <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-1" data-i18n="cal_releases_title">Recent Releases</h3>
+        <p class="text-xs text-slate-500 mb-4" data-i18n="cal_releases_desc">New books found for tracked authors, newest first.</p>
+        <div id="releases-empty" class="hidden text-center py-8 text-sm text-slate-500" data-i18n="cal_releases_empty">No releases found yet.</div>
+        <div id="author-releases-list" class="space-y-2"></div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6">
+        <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-1" data-i18n="cal_series_title">Series Gaps</h3>
+        <p class="text-xs text-slate-500 mb-4" data-i18n="cal_series_desc">Series in your library with missing volumes.</p>
+        <div id="series-gaps-empty" class="hidden text-center py-8 text-sm text-slate-500" data-i18n="cal_series_empty">No series gaps detected.</div>
+        <div id="series-gaps-list" class="space-y-2"></div>
+      </div>
+    </div>
+
     <!-- ==================== SETTINGS TAB ==================== -->
     <div id="tab-settings" class="tab-content">
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6">
@@ -338,6 +403,11 @@
             <div class="flex-1 min-w-[220px]"><input id="new-user-pass" type="password" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500" placeholder="password"></div>
             <button data-action="addUser" class="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors" data-i18n="add_user_btn">Add User</button>
           </div>
+          <!-- Populated by loadUsers() - was missing entirely before, which
+               made loadUsers() throw on a null getElementById and silently
+               re-hide this whole section (including the Add User form
+               above) via the outer catch, on every load, for every admin. -->
+          <div id="users-list" class="space-y-2"></div>
         </div>
 
         <!-- Invite Codes -->
@@ -719,6 +789,70 @@
             <input type="checkbox" id="remove-torrent-toggle" class="sr-only peer" checked data-action-change="toggleRemoveTorrent">
             <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
           </label>
+        </div>
+      </div>
+
+      <!-- Notifications / Webhooks (admin-only; hidden until loadWebhooks()
+           confirms admin access, same pattern as User Management above) -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6">
+        <div class="flex items-start justify-between mb-4 gap-3">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider" data-i18n="s_webhooks_title">Notifications</h3>
+            <p class="text-xs text-slate-500 mt-1" data-i18n="s_webhooks_desc">Send download, request, and author-release events to Discord, ntfy, Pushover, or any webhook-compatible service.</p>
+          </div>
+        </div>
+        <div id="webhooks-section" class="hidden space-y-4">
+          <div id="webhooks-empty" class="hidden text-sm text-slate-500" data-i18n="s_webhooks_empty">No channels configured yet.</div>
+          <div id="webhooks-list" class="space-y-2"></div>
+
+          <div class="border-t border-slate-800 pt-4 mt-2">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+              <div>
+                <label class="block text-xs text-slate-500 mb-1" data-i18n="s_wh_name">Name</label>
+                <input id="wh-name" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500" placeholder="e.g. My Phone">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-500 mb-1" data-i18n="s_wh_type">Type</label>
+                <select id="wh-type" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white" data-action-change="onWebhookTypeChange">
+                  <option value="discord">Discord</option>
+                  <option value="ntfy">ntfy</option>
+                  <option value="pushover">Pushover</option>
+                  <option value="generic">Generic (JSON)</option>
+                </select>
+              </div>
+            </div>
+            <div id="wh-url-field" class="mb-3">
+              <label class="block text-xs text-slate-500 mb-1" id="wh-url-label">Webhook URL</label>
+              <input id="wh-url" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500" placeholder="https://discord.com/api/webhooks/...">
+            </div>
+            <div id="wh-token-field" class="hidden mb-3">
+              <label class="block text-xs text-slate-500 mb-1" id="wh-token-label">Access token</label>
+              <input id="wh-token" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500">
+            </div>
+            <div id="wh-userkey-field" class="hidden mb-3">
+              <label class="block text-xs text-slate-500 mb-1" data-i18n="s_wh_userkey">User key</label>
+              <input id="wh-userkey" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500">
+            </div>
+            <div class="flex gap-2">
+              <button data-action="addWebhook" class="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors" data-i18n="add">Add</button>
+              <button data-action="testWebhookForm" class="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors" data-i18n="s_send_test">Send Test</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Duplicate Finder (admin-only) -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6">
+        <div class="flex items-start justify-between mb-4 gap-3">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider" data-i18n="s_dupes_title">Duplicate Finder</h3>
+            <p class="text-xs text-slate-500 mt-1" data-i18n="s_dupes_desc">Library items that share a file path, content hash, or title/author/format.</p>
+          </div>
+          <button data-action="loadDuplicates" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors whitespace-nowrap" data-i18n="refresh">Refresh</button>
+        </div>
+        <div id="duplicates-section" class="hidden">
+          <div id="duplicates-empty" class="hidden text-sm text-slate-500 py-2" data-i18n="s_dupes_empty">No duplicates found.</div>
+          <div id="duplicates-list" class="space-y-4"></div>
         </div>
       </div>
 

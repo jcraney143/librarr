@@ -190,10 +190,12 @@ func (d *DB) migrate() error {
 	migrations = append(migrations, `CREATE TABLE IF NOT EXISTS webhook_configs (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL DEFAULT '',
-		url TEXT NOT NULL,
+		url TEXT NOT NULL DEFAULT '',
 		type TEXT NOT NULL DEFAULT 'generic',
 		enabled INTEGER NOT NULL DEFAULT 1,
-		events TEXT NOT NULL DEFAULT '*'
+		events TEXT NOT NULL DEFAULT '*',
+		token TEXT NOT NULL DEFAULT '',
+		user_key TEXT NOT NULL DEFAULT ''
 	)`)
 
 	// Reading history table.
@@ -279,6 +281,20 @@ func (d *DB) migrate() error {
 		check_interval_days INTEGER NOT NULL DEFAULT 7
 	)`)
 
+	// Author releases: a history of new books found for monitored authors,
+	// feeding the Calendar tab. monitored_authors only ever remembers the
+	// single most recent find (last_book_found) — this table keeps every
+	// one so the calendar can show a timeline instead of one row per author.
+	migrations = append(migrations, `CREATE TABLE IF NOT EXISTS author_releases (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		author_id INTEGER NOT NULL,
+		author_name TEXT NOT NULL DEFAULT '',
+		title TEXT NOT NULL DEFAULT '',
+		year INTEGER NOT NULL DEFAULT 0,
+		found_at REAL NOT NULL DEFAULT (strftime('%s','now'))
+	)`)
+	migrations = append(migrations, `CREATE INDEX IF NOT EXISTS idx_author_releases_found_at ON author_releases(found_at DESC)`)
+
 	// Invite codes for secure self-registration.
 	migrations = append(migrations, `CREATE TABLE IF NOT EXISTS invite_codes (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -311,6 +327,8 @@ func (d *DB) migrate() error {
 		`ALTER TABLE reading_history ADD COLUMN status TEXT NOT NULL DEFAULT ''`,
 		`ALTER TABLE requests ADD COLUMN isbn TEXT NOT NULL DEFAULT ''`,
 		`ALTER TABLE requests ADD COLUMN source TEXT NOT NULL DEFAULT ''`,
+		`ALTER TABLE webhook_configs ADD COLUMN token TEXT NOT NULL DEFAULT ''`,
+		`ALTER TABLE webhook_configs ADD COLUMN user_key TEXT NOT NULL DEFAULT ''`,
 	}
 	for _, stmt := range addColumns {
 		if _, err := d.db.Exec(stmt); err != nil && !strings.Contains(strings.ToLower(err.Error()), "duplicate column") {

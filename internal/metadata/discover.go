@@ -86,12 +86,58 @@ func (s *DiscoverService) BrowseGenre(ctx context.Context, subject string, limit
 	return s.openLibrary.BrowseSubject(ctx, subject, limit)
 }
 
-// GetDetail fetches full detail for one result by source+id.
-func (s *DiscoverService) GetDetail(ctx context.Context, source, id string) (*models.DiscoverResult, error) {
+// GetDetail fetches full detail for one result by source+id, plus a short
+// "more by this author" recommendation list. author is a hint from the
+// caller (the summary result the frontend already had before opening the
+// detail modal) - Open Library's work-detail endpoint doesn't resolve the
+// author's name without a further lookup, so GetWork's own result usually
+// has an empty Author; falling back to result.Author only helps the Google
+// Books side, which does resolve it.
+func (s *DiscoverService) GetDetail(ctx context.Context, source, id, author string) (*models.DiscoverResult, error) {
+	var result *models.DiscoverResult
+	var err error
 	if source == "open_library" {
-		return s.openLibrary.GetWork(ctx, id)
+		result, err = s.openLibrary.GetWork(ctx, id)
+	} else {
+		result, err = s.googleBooks.GetVolume(ctx, id)
 	}
-	return s.googleBooks.GetVolume(ctx, id)
+	if err != nil || result == nil {
+		return result, err
+	}
+
+	authorForRecs := strings.TrimSpace(author)
+	if authorForRecs == "" {
+		authorForRecs = result.Author
+	}
+	if authorForRecs != "" {
+		result.Recommended = s.recommendedByAuthor(ctx, authorForRecs, result.Title)
+	}
+	return result, nil
+}
+
+// recommendedByAuthor returns a short "more by this author" list for the
+// Discover detail modal, excluding the book currently being viewed. Reuses
+// the same merged Google Books + Open Library search as the main Discover
+// search box, rather than a separate recommendation source - neither
+// catalog has a keyless "similar books" endpoint, but "more by this
+// author" is data both already have and is a reasonable stand-in.
+func (s *DiscoverService) recommendedByAuthor(ctx context.Context, author, excludeTitle string) []models.DiscoverResult {
+	const maxRecommended = 6
+	// Pad the request since the book being viewed is filtered back out.
+	candidates := s.Search(ctx, author, maxRecommended+4)
+	excludeKey := normalizeTitle(excludeTitle)
+
+	recs := make([]models.DiscoverResult, 0, maxRecommended)
+	for _, c := range candidates {
+		if normalizeTitle(c.Title) == excludeKey {
+			continue
+		}
+		recs = append(recs, c)
+		if len(recs) >= maxRecommended {
+			break
+		}
+	}
+	return recs
 }
 
 func normalizeTitle(title string) string {

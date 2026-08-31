@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JeremiahM37/librarr/internal/db"
 	"github.com/JeremiahM37/librarr/internal/models"
 )
 
@@ -502,6 +503,28 @@ func (s *Server) handleAddWishlist(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, map[string]interface{}{
 		"success": true,
 		"id":      id,
+	})
+}
+
+// handleListDuplicates handles GET /api/library/duplicates — admin only.
+// Surfaces the same signals as docs/library-duplicate-report.md (same
+// destination path, same content hash, same title/author/format) as a real
+// endpoint instead of something only reachable with sqlite3 and the raw DB
+// file.
+func (s *Server) handleListDuplicates(w http.ResponseWriter, r *http.Request) {
+	groups, err := s.db.GetDuplicateGroups()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false, "error": "Failed to find duplicates",
+		})
+		return
+	}
+	if groups == nil {
+		groups = []db.DuplicateGroup{}
+	}
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"groups":  groups,
 	})
 }
 

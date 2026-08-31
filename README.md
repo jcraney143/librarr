@@ -57,6 +57,7 @@ Librarr searches all configured indexers in parallel, scores results by confiden
 - **Auto-import pipeline** -- organize files by author/title, rename on import (configurable pattern), scan into Calibre/Audiobookshelf/Kavita/Komga
 - **Series auto-complete** -- detect gaps in series, search for and download missing books
 - **Author monitoring** -- follow authors, periodically check for new releases, auto-notify
+- **Calendar tab** -- manage tracked authors (add/remove/check now), see a timeline of new releases found, and see series with missing volumes in one place
 - **Reading history** -- track what you've read with stats (books per month, pages, completion rate)
 - **Tags** -- organize library items with custom tags for filtering and grouping
 - **Series grouping** -- groups related books/volumes in the library view
@@ -573,6 +574,8 @@ different format); that is what the UI's **Download anyway** button sends.
 | GET | `/api/authors` | List monitored authors |
 | POST | `/api/authors/monitor` | Add author (admin) |
 | DELETE | `/api/authors/{id}` | Remove author (admin) |
+| POST | `/api/authors/{id}/check` | Check one author now, bypassing its interval (admin) |
+| GET | `/api/authors/releases` | Recent releases found for monitored authors (Calendar feed) |
 
 ### Reading History
 

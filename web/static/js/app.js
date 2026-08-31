@@ -85,11 +85,104 @@ const I18N = {
     request_failed: 'Request failed: {msg}',
     already_requested: '"{title}" has already been requested',
     discover_detail_error: 'Failed to load book details',
+    discover_recommended_title: 'More by this author',
     watch_button: 'Watch',
     watching_badge: 'Watching',
     watch_author_button: 'Watch {author} for new releases',
     author_watch_added: 'Watching {author} for new releases',
     author_watch_failed: 'Failed to watch author',
+    // Calendar
+    nav_calendar: 'Calendar',
+    remove: 'Remove',
+    cal_authors_title: 'Tracked Authors',
+    cal_authors_desc: 'Follow an author to get notified when a new book is found.',
+    ph_author_name: 'Author name',
+    cal_track_btn: 'Track',
+    cal_authors_empty: 'Not tracking any authors yet.',
+    cal_authors_load_failed: 'Failed to load tracked authors',
+    cal_never_checked: 'never',
+    cal_checking_soon: 'soon',
+    cal_last_found: 'Last found: {title}',
+    cal_check_now: 'Check now',
+    cal_next_check: 'Next check: {date}',
+    cal_last_checked: 'Last checked: {date}',
+    author_tracked: 'Tracking {author} for new releases',
+    author_track_failed: 'Failed to track author',
+    author_removed: 'Stopped tracking {author}',
+    author_remove_failed: 'Failed to remove author',
+    author_check_started: 'Checking now',
+    author_check_failed: 'Check failed',
+    cal_releases_title: 'Recent Releases',
+    cal_releases_desc: 'New books found for tracked authors, newest first.',
+    cal_releases_empty: 'No releases found yet.',
+    cal_releases_load_failed: 'Failed to load releases',
+    cal_series_title: 'Series Gaps',
+    cal_series_desc: 'Series in your library with missing volumes.',
+    cal_series_empty: 'No series gaps detected.',
+    cal_series_load_failed: 'Failed to load series',
+    cal_series_progress: '{owned}/{total} owned',
+    cal_series_missing: '{n} missing',
+    cal_search_missing: 'Search missing',
+    series_search_started: 'Searching for missing {series} volumes',
+    series_search_failed: 'Search failed',
+    // Requests
+    nav_requests: 'Requests',
+    requests_title: 'Requests',
+    requests_empty: 'No requests',
+    requests_empty_hint: 'Requested books from Discover will show up here.',
+    req_filter_pending: 'Pending',
+    req_filter_all: 'All',
+    req_approve: 'Approve',
+    req_retry: 'Retry',
+    req_cancel: 'Cancel',
+    req_load_failed: 'Failed to load requests',
+    req_approved_toast: 'Request approved',
+    req_approve_failed: 'Failed to approve request',
+    req_retried_toast: 'Retrying request',
+    req_retry_failed: 'Failed to retry request',
+    req_cancelled_toast: 'Request cancelled',
+    req_cancel_failed: 'Failed to cancel request',
+    req_deleted_toast: 'Request deleted',
+    req_delete_failed: 'Failed to delete request',
+    reqstatus_pending: 'Pending',
+    reqstatus_approved: 'Approved',
+    reqstatus_searching: 'Searching',
+    reqstatus_downloading: 'Downloading',
+    reqstatus_processing: 'Processing',
+    reqstatus_completed: 'Completed',
+    reqstatus_failed: 'Failed',
+    reqstatus_cancelled: 'Cancelled',
+    // Notifications / Webhooks
+    s_webhooks_title: 'Notifications',
+    s_webhooks_desc: 'Send download, request, and author-release events to Discord, ntfy, Pushover, or any webhook-compatible service.',
+    s_webhooks_empty: 'No channels configured yet.',
+    s_wh_name: 'Name',
+    s_wh_type: 'Type',
+    s_wh_url: 'Webhook URL',
+    s_wh_url_ntfy: 'ntfy topic URL',
+    s_wh_token_pushover: 'Application token',
+    s_wh_token_ntfy: 'Access token (optional, for a protected topic)',
+    s_wh_userkey: 'User key',
+    s_wh_pushover_target: 'Pushover',
+    s_wh_enabled: 'Enabled',
+    s_send_test: 'Send Test',
+    s_wh_added: 'Notification channel added',
+    s_wh_add_failed: 'Failed to add channel',
+    s_wh_test_sent: 'Test notification sent',
+    s_wh_test_failed: 'Test failed',
+    s_wh_update_failed: 'Failed to update channel',
+    s_wh_deleted: 'Channel removed',
+    s_wh_delete_failed: 'Failed to remove channel',
+    // Duplicate Finder
+    s_dupes_title: 'Duplicate Finder',
+    s_dupes_desc: 'Library items that share a file path, content hash, or title/author/format.',
+    s_dupes_empty: 'No duplicates found.',
+    s_dupes_reason_path: 'Same file path',
+    s_dupes_reason_content: 'Same content',
+    s_dupes_reason_title: 'Same title & author',
+    s_dupes_delete_item: 'Delete',
+    s_dupes_item_deleted: 'Item deleted',
+    s_dupes_delete_failed: 'Failed to delete item',
     download: 'Download',
     download_added: 'Added',
     download_failed_state: 'Failed',
@@ -319,11 +412,104 @@ const I18N = {
     request_failed: 'Ошибка запроса: {msg}',
     already_requested: '«{title}» уже запрошено',
     discover_detail_error: 'Не удалось загрузить информацию о книге',
+    discover_recommended_title: 'Ещё у этого автора',
     watch_button: 'Следить',
     watching_badge: 'Отслеживается',
     watch_author_button: 'Следить за новинками автора {author}',
     author_watch_added: 'Отслеживание новинок автора {author}',
     author_watch_failed: 'Не удалось начать отслеживание автора',
+    // Calendar
+    nav_calendar: 'Календарь',
+    remove: 'Удалить',
+    cal_authors_title: 'Отслеживаемые авторы',
+    cal_authors_desc: 'Следите за автором, чтобы получать уведомления о новых книгах.',
+    ph_author_name: 'Имя автора',
+    cal_track_btn: 'Отслеживать',
+    cal_authors_empty: 'Пока нет отслеживаемых авторов.',
+    cal_authors_load_failed: 'Не удалось загрузить отслеживаемых авторов',
+    cal_never_checked: 'никогда',
+    cal_checking_soon: 'скоро',
+    cal_last_found: 'Последняя находка: {title}',
+    cal_check_now: 'Проверить сейчас',
+    cal_next_check: 'Следующая проверка: {date}',
+    cal_last_checked: 'Последняя проверка: {date}',
+    author_tracked: 'Отслеживание новинок автора {author}',
+    author_track_failed: 'Не удалось начать отслеживание автора',
+    author_removed: 'Отслеживание автора {author} остановлено',
+    author_remove_failed: 'Не удалось удалить автора',
+    author_check_started: 'Проверка запущена',
+    author_check_failed: 'Ошибка проверки',
+    cal_releases_title: 'Недавние релизы',
+    cal_releases_desc: 'Новые книги отслеживаемых авторов, сначала новые.',
+    cal_releases_empty: 'Релизы пока не найдены.',
+    cal_releases_load_failed: 'Не удалось загрузить релизы',
+    cal_series_title: 'Пробелы в сериях',
+    cal_series_desc: 'Серии в вашей библиотеке с недостающими томами.',
+    cal_series_empty: 'Пробелов в сериях не обнаружено.',
+    cal_series_load_failed: 'Не удалось загрузить серии',
+    cal_series_progress: '{owned}/{total} в наличии',
+    cal_series_missing: 'не хватает {n}',
+    cal_search_missing: 'Найти недостающие',
+    series_search_started: 'Поиск недостающих томов серии {series}',
+    series_search_failed: 'Ошибка поиска',
+    // Requests
+    nav_requests: 'Запросы',
+    requests_title: 'Запросы',
+    requests_empty: 'Нет запросов',
+    requests_empty_hint: 'Книги, запрошенные из раздела «Обзор», появятся здесь.',
+    req_filter_pending: 'Ожидают',
+    req_filter_all: 'Все',
+    req_approve: 'Одобрить',
+    req_retry: 'Повторить',
+    req_cancel: 'Отменить',
+    req_load_failed: 'Не удалось загрузить запросы',
+    req_approved_toast: 'Запрос одобрен',
+    req_approve_failed: 'Не удалось одобрить запрос',
+    req_retried_toast: 'Повторная обработка запроса',
+    req_retry_failed: 'Не удалось повторить запрос',
+    req_cancelled_toast: 'Запрос отменён',
+    req_cancel_failed: 'Не удалось отменить запрос',
+    req_deleted_toast: 'Запрос удалён',
+    req_delete_failed: 'Не удалось удалить запрос',
+    reqstatus_pending: 'Ожидает',
+    reqstatus_approved: 'Одобрен',
+    reqstatus_searching: 'Поиск',
+    reqstatus_downloading: 'Загрузка',
+    reqstatus_processing: 'Обработка',
+    reqstatus_completed: 'Завершён',
+    reqstatus_failed: 'Ошибка',
+    reqstatus_cancelled: 'Отменён',
+    // Notifications / Webhooks
+    s_webhooks_title: 'Уведомления',
+    s_webhooks_desc: 'Отправляйте события загрузок, запросов и новых релизов авторов в Discord, ntfy, Pushover или любой совместимый вебхук.',
+    s_webhooks_empty: 'Каналы ещё не настроены.',
+    s_wh_name: 'Название',
+    s_wh_type: 'Тип',
+    s_wh_url: 'URL вебхука',
+    s_wh_url_ntfy: 'URL темы ntfy',
+    s_wh_token_pushover: 'Токен приложения',
+    s_wh_token_ntfy: 'Токен доступа (необязательно, для защищённой темы)',
+    s_wh_userkey: 'Ключ пользователя',
+    s_wh_pushover_target: 'Pushover',
+    s_wh_enabled: 'Включено',
+    s_send_test: 'Отправить тест',
+    s_wh_added: 'Канал уведомлений добавлен',
+    s_wh_add_failed: 'Не удалось добавить канал',
+    s_wh_test_sent: 'Тестовое уведомление отправлено',
+    s_wh_test_failed: 'Ошибка теста',
+    s_wh_update_failed: 'Не удалось обновить канал',
+    s_wh_deleted: 'Канал удалён',
+    s_wh_delete_failed: 'Не удалось удалить канал',
+    // Duplicate Finder
+    s_dupes_title: 'Поиск дубликатов',
+    s_dupes_desc: 'Элементы библиотеки с одинаковым путём, хешем содержимого или названием/автором/форматом.',
+    s_dupes_empty: 'Дубликаты не найдены.',
+    s_dupes_reason_path: 'Одинаковый путь',
+    s_dupes_reason_content: 'Одинаковое содержимое',
+    s_dupes_reason_title: 'Одинаковые название и автор',
+    s_dupes_delete_item: 'Удалить',
+    s_dupes_item_deleted: 'Элемент удалён',
+    s_dupes_delete_failed: 'Не удалось удалить элемент',
     download: 'Скачать',
     download_added: 'Добавлено',
     download_failed_state: 'Ошибка',
@@ -551,6 +737,8 @@ const state = {
   downloadPollTimer: null,
   currentUser: null,
   currentRole: null,
+  requestsFilter: 'pending',
+  webhooks: [],
 };
 
 const SOURCE_COLORS = {
@@ -596,6 +784,14 @@ const STATUS_STYLES = {
   searching:   { bg: 'bg-indigo-500/20', text: 'text-indigo-400', border: 'border-indigo-500/30', label: 'Searching' },
   importing:   { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', label: 'Importing' },
   retry_wait:  { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/30', label: 'Retry Wait' },
+  // Request-workflow statuses (pending, approved, processing, failed,
+  // cancelled) - the rest (searching/downloading/completed) are shared
+  // with download jobs and already covered above.
+  pending:     { bg: 'bg-slate-500/20', text: 'text-slate-400', border: 'border-slate-500/30', label: 'Pending' },
+  approved:    { bg: 'bg-indigo-500/20', text: 'text-indigo-400', border: 'border-indigo-500/30', label: 'Approved' },
+  processing:  { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', label: 'Processing' },
+  failed:      { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30', label: 'Failed' },
+  cancelled:   { bg: 'bg-slate-500/20', text: 'text-slate-400', border: 'border-slate-500/30', label: 'Cancelled' },
 };
 
 const TERMINAL_DOWNLOAD_STATUSES = new Set(['completed', 'error', 'dead_letter']);
@@ -1022,6 +1218,8 @@ function switchTab(tab) {
   if (tab === 'wishlist') loadWishlist();
   if (tab === 'settings') loadSettings();
   if (tab === 'discover') loadDiscoverIfEmpty();
+  if (tab === 'calendar') loadCalendar();
+  if (tab === 'requests') loadRequests(state.requestsFilter);
 }
 
 function switchSearchTab(tab) {
@@ -1343,17 +1541,27 @@ function renderBookCard(result, index) {
   `;
 }
 
-function makePlaceholderHtml(title, index) {
+// PLACEHOLDER_SIZES lets one placeholder generator serve both the grid
+// cards (full-width) and the Discover modal's small cover thumbnail -
+// otherwise a broken modal cover would fall back to a card-sized block that
+// blows out the modal's two-column layout.
+const PLACEHOLDER_SIZES = {
+  card: 'w-full h-48',
+  modal: 'w-24 h-36 rounded-lg shrink-0',
+  rec: 'w-full h-28 rounded-t-lg',
+};
+
+function makePlaceholderHtml(title, index, size = 'card') {
   const gradient = COVER_GRADIENTS[index % COVER_GRADIENTS.length];
   const letter = (title || '?').charAt(0).toUpperCase();
-  return `<div class="w-full h-48 bg-gradient-to-br ${gradient} cover-placeholder">${escapeHtml(letter)}</div>`;
+  return `<div class="${PLACEHOLDER_SIZES[size] || PLACEHOLDER_SIZES.card} bg-gradient-to-br ${gradient} cover-placeholder">${escapeHtml(letter)}</div>`;
 }
 
-// Global function for img onerror fallback
-window.makePlaceholder = function(title, index) {
-  const gradient = COVER_GRADIENTS[index % COVER_GRADIENTS.length];
-  const letter = (title || '?').charAt(0).toUpperCase();
-  return `<div class="w-full h-48 bg-gradient-to-br ${gradient} cover-placeholder">${escapeHtml(letter)}</div>`;
+// Global function for img onerror fallback (see the delegated 'error'
+// listener below - reads data-ph-title/data-ph-idx/data-ph-size off the
+// failed <img>).
+window.makePlaceholder = function(title, index, size = 'card') {
+  return makePlaceholderHtml(title, index, size);
 };
 
 function formatSize(size) {
@@ -1853,8 +2061,11 @@ function renderDiscoverResults() {
 }
 
 function renderDiscoverCard(result, index) {
+  // data-ph-* wires this into the same broken-image fallback the Library/
+  // Search grids already use (Open Library / Google Books cover URLs 404
+  // often enough that this was leaving a bare broken-image icon before).
   const coverHtml = result.cover_url
-    ? `<img src="${escapeHtml(result.cover_url)}" alt="" class="w-full h-48 object-cover" loading="lazy">`
+    ? `<img src="${escapeHtml(result.cover_url)}" alt="" class="w-full h-48 object-cover" loading="lazy" data-ph-title="${escapeHtml(result.title || '')}" data-ph-idx="${index}">`
     : makePlaceholderHtml(result.title || '?', index);
 
   const ownedBadge = result.in_library
@@ -1886,19 +2097,48 @@ let discoverDetailAbort = null;
 function openDiscoverDetail(index) {
   const result = state.discoverResults[index];
   if (!result) return;
+  openDiscoverDetailResult(result);
+}
+
+// Opens a recommended book from inside the modal (see renderDiscoverModalRecommended)
+// - looked up by index into the currently-open result's own .recommended
+// list, not state.discoverResults, since recommended items never appear in
+// the main grid.
+function openRecommendedBook(idx) {
+  const current = state.discoverDetailResult;
+  const rec = current && (current.recommended || [])[idx];
+  if (!rec) return;
+  openDiscoverDetailResult(rec);
+}
+
+function openDiscoverDetailResult(result) {
   state.discoverDetailResult = result;
   showDiscoverModal(result);
 
-  // The search result carries only summary fields (no description) - fetch
-  // the full detail in the background and merge it in once it lands, so the
-  // modal opens instantly instead of blocking on a network round-trip.
+  // The search result carries only summary fields (no description, rating,
+  // or recommendations) - fetch the full detail in the background and merge
+  // it in once it lands, so the modal opens instantly instead of blocking
+  // on a network round-trip. author is passed through as a hint: Open
+  // Library's work-detail lookup can't resolve the author's name on its
+  // own, so the backend needs the one the summary card already had to
+  // compute "more by this author".
   if (discoverDetailAbort) discoverDetailAbort.abort();
   discoverDetailAbort = new AbortController();
   const signal = discoverDetailAbort.signal;
 
-  apiJson(`/api/discover/book/${encodeURIComponent(result.source)}/${encodeURIComponent(result.source_id)}`, { signal })
+  const url = `/api/discover/book/${encodeURIComponent(result.source)}/${encodeURIComponent(result.source_id)}`
+    + `?author=${encodeURIComponent(result.author || '')}`;
+
+  apiJson(url, { signal })
     .then(detail => {
       if (signal.aborted || state.discoverDetailResult !== result) return; // modal moved on
+      // Open Library's work-detail lookup (GetWork, server-side) only has a
+      // much less reliable OLID-guessed cover to fall back to - no cover_i
+      // the way search results have. If the summary card already had a
+      // real cover, keep it rather than let a worse guess silently replace
+      // a cover that was already working (this is why the cover used to
+      // appear to "disappear" the moment you opened a book's description).
+      if (result.cover_url && detail.cover_url) delete detail.cover_url;
       Object.assign(result, detail);
       showDiscoverModal(result);
     })
@@ -1910,14 +2150,29 @@ function openDiscoverDetail(index) {
     });
 }
 
+function renderRatingHtml(rating, count) {
+  if (!rating || !count) return '';
+  const rounded = Math.round(rating);
+  const stars = '★'.repeat(Math.max(0, Math.min(5, rounded))) + '☆'.repeat(5 - Math.max(0, Math.min(5, rounded)));
+  return `<p class="text-xs text-amber-400 flex items-center gap-1.5 mb-1">
+      <span class="tracking-tight" aria-hidden="true">${stars}</span>
+      <span class="text-slate-500">${rating.toFixed(1)} (${count})</span>
+    </p>`;
+}
+
 function showDiscoverModal(result) {
   const modal = document.getElementById('discover-modal');
   modal.classList.remove('hidden');
   modal.classList.add('flex');
 
+  // data-ph-* wires this into the shared broken-image fallback (see the
+  // delegated 'error' listener) with the 'modal' size variant, so a cover
+  // URL that 404s falls back to the gradient placeholder instead of a bare
+  // broken-image icon - previously the cover had no fallback at all here,
+  // so it visibly vanished the moment you opened a book's description.
   const coverHtml = result.cover_url
-    ? `<img src="${escapeHtml(result.cover_url)}" alt="" class="w-24 h-36 object-cover rounded-lg shrink-0">`
-    : `<div class="w-24 h-36 rounded-lg shrink-0 bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center text-2xl font-bold text-white">${escapeHtml((result.title || '?').charAt(0).toUpperCase())}</div>`;
+    ? `<img src="${escapeHtml(result.cover_url)}" alt="" class="w-24 h-36 object-cover rounded-lg shrink-0" data-ph-title="${escapeHtml(result.title || '')}" data-ph-idx="0" data-ph-size="modal">`
+    : makePlaceholderHtml(result.title || '?', 0, 'modal');
 
   const metaBits = [result.published_date, result.page_count ? `${result.page_count}p` : '', (result.categories || [])[0]]
     .filter(Boolean).map(escapeHtml).join(' · ');
@@ -1927,10 +2182,37 @@ function showDiscoverModal(result) {
     <div class="min-w-0">
       <h2 class="text-lg font-bold text-white leading-tight mb-1">${escapeHtml(result.title || 'Unknown')}</h2>
       <p class="text-sm text-slate-400 mb-1">${escapeHtml(result.author || '')}</p>
+      ${renderRatingHtml(result.rating, result.ratings_count)}
       <p class="text-xs text-slate-500">${metaBits}</p>
     </div>`;
   document.getElementById('discover-modal-description').textContent = result.description || '';
   renderDiscoverModalActions(result);
+  renderDiscoverModalRecommended(result);
+}
+
+function renderDiscoverModalRecommended(result) {
+  const container = document.getElementById('discover-modal-recommended');
+  const items = result.recommended || [];
+  if (items.length === 0) {
+    container.classList.add('hidden');
+    container.innerHTML = '';
+    return;
+  }
+  container.classList.remove('hidden');
+  container.innerHTML = `
+    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">${escapeHtml(t('discover_recommended_title'))}</h3>
+    <div class="flex gap-2 overflow-x-auto pb-1">${items.map(renderRecommendedCard).join('')}</div>`;
+}
+
+function renderRecommendedCard(r, i) {
+  const coverHtml = r.cover_url
+    ? `<img src="${escapeHtml(r.cover_url)}" alt="" class="w-full h-28 object-cover rounded-t-lg" loading="lazy" data-ph-title="${escapeHtml(r.title || '')}" data-ph-idx="${i}" data-ph-size="rec">`
+    : makePlaceholderHtml(r.title || '?', i, 'rec');
+  return `
+    <button data-action="openRecommendedBook" data-idx="${i}" class="w-24 flex-shrink-0 text-left bg-slate-800/60 hover:bg-slate-800 rounded-lg overflow-hidden transition-colors">
+      ${coverHtml}
+      <p class="text-[11px] text-slate-300 px-1.5 py-1 line-clamp-2 leading-tight">${escapeHtml(r.title || '')}</p>
+    </button>`;
 }
 
 function renderDiscoverModalActions(result) {
@@ -2413,6 +2695,337 @@ function searchWishlistItem(title, mediaType) {
 }
 
 // ============================================================
+// CALENDAR — tracked authors, their release timeline, series gaps
+// ============================================================
+// A zero Go time.Time serializes as "0001-01-01T00:00:00Z" rather than
+// being omitted (MonitoredAuthor.LastChecked has no omitzero/omitempty
+// tag) - treat that as "never", same idea used for NextCheck being
+// entirely absent (it does have omitzero) when never checked.
+function isZeroDate(iso) {
+  return !iso || iso.startsWith('0001-01-01');
+}
+
+async function loadCalendar() {
+  loadTrackedAuthors();
+  loadAuthorReleases();
+  loadSeriesGaps();
+}
+
+async function loadTrackedAuthors() {
+  document.getElementById('author-add-form').classList.toggle('hidden', state.currentRole !== 'admin');
+  try {
+    const data = await apiJson('/api/authors');
+    const list = Array.isArray(data) ? data : (data.authors || []);
+    const container = document.getElementById('tracked-authors-list');
+    const emptyEl = document.getElementById('authors-empty');
+    if (list.length === 0) {
+      container.innerHTML = '';
+      emptyEl.classList.remove('hidden');
+      return;
+    }
+    emptyEl.classList.add('hidden');
+    container.innerHTML = list.map(renderTrackedAuthor).join('');
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('cal_authors_load_failed'), 'error');
+  }
+}
+
+function renderTrackedAuthor(a) {
+  const lastChecked = isZeroDate(a.last_checked) ? t('cal_never_checked') : new Date(a.last_checked).toLocaleString();
+  const nextCheck = a.next_check && !isZeroDate(a.next_check) ? new Date(a.next_check).toLocaleString() : t('cal_checking_soon');
+  const lastFound = a.last_book_found
+    ? `<p class="text-xs text-slate-400 truncate">${escapeHtml(t('cal_last_found', { title: a.last_book_found }))}</p>`
+    : '';
+  // Add/remove/check-now are admin-gated on the backend (mirrors the
+  // existing admin-gated POST /api/authors/monitor from the Discover tab's
+  // "Watch author" button) - hide the controls to match, not just rely on
+  // the API call failing.
+  const adminBtns = state.currentRole === 'admin' ? `
+    <button data-action="checkAuthorNow" data-id="${a.id}" class="px-2.5 py-1 text-xs bg-slate-700 hover:bg-indigo-600 text-slate-300 hover:text-white rounded transition-colors whitespace-nowrap">${t('cal_check_now')}</button>
+    <button data-action="deleteTrackedAuthor" data-id="${a.id}" data-name="${escapeHtml(a.name)}" class="px-2.5 py-1 text-xs bg-slate-700 hover:bg-red-600 text-slate-300 hover:text-white rounded transition-colors" title="${t('remove')}">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    </button>` : '';
+
+  return `
+    <div class="bg-slate-950/40 border border-slate-800 rounded-lg px-4 py-3 flex items-center gap-4">
+      <div class="flex-1 min-w-0">
+        <h4 class="text-sm font-medium text-white truncate">${escapeHtml(a.name)}</h4>
+        ${lastFound}
+        <p class="text-xs text-slate-600">${escapeHtml(t('cal_next_check', { date: nextCheck }))} · ${escapeHtml(t('cal_last_checked', { date: lastChecked }))}</p>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">${adminBtns}</div>
+    </div>
+  `;
+}
+
+async function addTrackedAuthor() {
+  const nameInput = document.getElementById('new-author-name');
+  const name = nameInput.value.trim();
+  if (!name) {
+    showToast(t('err_title_required'), 'warning');
+    return;
+  }
+  try {
+    await apiJson('/api/authors/monitor', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    });
+    showToast(t('author_tracked', { author: name }), 'success');
+    nameInput.value = '';
+    loadTrackedAuthors();
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('author_track_failed'), 'error');
+  }
+}
+
+async function deleteTrackedAuthor(id, name) {
+  try {
+    await apiJson(`/api/authors/${id}`, { method: 'DELETE' });
+    showToast(t('author_removed', { author: name || '' }), 'success');
+    loadTrackedAuthors();
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('author_remove_failed'), 'error');
+  }
+}
+
+async function checkAuthorNow(id) {
+  try {
+    await apiJson(`/api/authors/${id}/check`, { method: 'POST' });
+    showToast(t('author_check_started'), 'success');
+    loadTrackedAuthors();
+    loadAuthorReleases();
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('author_check_failed'), 'error');
+  }
+}
+
+async function loadAuthorReleases() {
+  try {
+    const data = await apiJson('/api/authors/releases?limit=50');
+    const list = data.releases || [];
+    const container = document.getElementById('author-releases-list');
+    const emptyEl = document.getElementById('releases-empty');
+    if (list.length === 0) {
+      container.innerHTML = '';
+      emptyEl.classList.remove('hidden');
+      return;
+    }
+    emptyEl.classList.add('hidden');
+    container.innerHTML = list.map(renderAuthorRelease).join('');
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('cal_releases_load_failed'), 'error');
+  }
+}
+
+function renderAuthorRelease(r) {
+  const date = r.found_at && !isZeroDate(r.found_at) ? new Date(r.found_at).toLocaleDateString() : '';
+  return `
+    <div class="bg-slate-950/40 border border-slate-800 rounded-lg px-4 py-3 flex items-center gap-4">
+      <div class="flex-1 min-w-0">
+        <h4 class="text-sm font-medium text-white truncate">${escapeHtml(r.title || '')}</h4>
+        <p class="text-xs text-slate-400 truncate">${escapeHtml(r.author_name || '')}${r.year ? ` (${r.year})` : ''}</p>
+      </div>
+      <span class="text-xs text-slate-600 flex-shrink-0">${date}</span>
+    </div>
+  `;
+}
+
+async function loadSeriesGaps() {
+  try {
+    const data = await apiJson('/api/series');
+    const all = data.series || [];
+    const gaps = all.filter(s => (s.missing_books || []).length > 0);
+    const container = document.getElementById('series-gaps-list');
+    const emptyEl = document.getElementById('series-gaps-empty');
+    if (gaps.length === 0) {
+      container.innerHTML = '';
+      emptyEl.classList.remove('hidden');
+      return;
+    }
+    emptyEl.classList.add('hidden');
+    container.innerHTML = gaps.map(renderSeriesGap).join('');
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('cal_series_load_failed'), 'error');
+  }
+}
+
+function renderSeriesGap(s) {
+  const missing = s.missing_books || [];
+  return `
+    <div class="bg-slate-950/40 border border-slate-800 rounded-lg px-4 py-3 flex items-center gap-4">
+      <div class="flex-1 min-w-0">
+        <h4 class="text-sm font-medium text-white truncate">${escapeHtml(s.series_name || '')}</h4>
+        <p class="text-xs text-slate-400">${escapeHtml(t('cal_series_progress', { owned: s.owned_count, total: s.known_total }))} · ${escapeHtml(t('cal_series_missing', { n: missing.length }))}</p>
+      </div>
+      <button data-action="searchSeriesGap" data-name="${escapeHtml(s.series_name || '')}" class="px-2.5 py-1 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded transition-colors flex-shrink-0 whitespace-nowrap">${t('cal_search_missing')}</button>
+    </div>
+  `;
+}
+
+async function searchSeriesGap(name) {
+  try {
+    await apiJson(`/api/series/${encodeURIComponent(name)}/search-missing`, { method: 'POST' });
+    showToast(t('series_search_started', { series: name }), 'success');
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('series_search_failed'), 'error');
+  }
+}
+
+// ============================================================
+// REQUESTS — approval queue for the Discover "Request" workflow. The
+// backend (approve/cancel/retry/select/delete + the search+download
+// pipeline in internal/api/requests.go) already existed; this is its
+// first UI.
+// ============================================================
+async function switchRequestsFilter(filter) {
+  state.requestsFilter = filter;
+  document.querySelectorAll('.req-filter').forEach(el => {
+    const active = el.dataset.filter === filter;
+    el.classList.toggle('active', active);
+    el.classList.toggle('bg-indigo-600', active);
+    el.classList.toggle('text-white', active);
+    el.classList.toggle('bg-slate-800', !active);
+    el.classList.toggle('text-slate-400', !active);
+  });
+  await loadRequests(filter);
+}
+
+async function loadRequests(filter) {
+  try {
+    const qs = filter ? `?status=${encodeURIComponent(filter)}` : '';
+    const data = await apiJson(`/api/requests${qs}`);
+    const requests = data.requests || [];
+    const container = document.getElementById('requests-list');
+    const emptyEl = document.getElementById('requests-empty');
+
+    if (requests.length === 0) {
+      container.innerHTML = '';
+      emptyEl.classList.remove('hidden');
+    } else {
+      emptyEl.classList.add('hidden');
+      container.innerHTML = requests.map(renderRequestItem).join('');
+    }
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('req_load_failed'), 'error');
+  }
+}
+
+// Keeps the nav badge showing the pending count even when the Requests tab
+// isn't open - admin-only signal that something needs approval (mirrors
+// the Downloads tab's dl-badge). Regular users don't get a useful count
+// here (they'd only ever see their own pending requests, which they
+// already know about), so skip the fetch for them.
+async function refreshRequestsBadge() {
+  const badge = document.getElementById('requests-badge');
+  if (state.currentRole !== 'admin') {
+    badge.classList.add('hidden');
+    return;
+  }
+  try {
+    const data = await apiJson('/api/requests?status=pending&limit=1');
+    const count = data.total || 0;
+    if (count > 0) {
+      badge.textContent = count > 99 ? '99+' : String(count);
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  } catch (err) {
+    // Silent - this is a background nav badge, not worth a toast.
+  }
+}
+
+function renderRequestItem(req) {
+  const style = STATUS_STYLES[req.status] || STATUS_STYLES.pending;
+  const coverHtml = req.cover_url
+    ? `<img src="${escapeHtml(req.cover_url)}" alt="" class="w-12 h-[4.5rem] object-cover rounded shrink-0" data-ph-title="${escapeHtml(req.title || '')}" data-ph-idx="0" data-ph-size="modal">`
+    : `<div class="w-12 h-[4.5rem] rounded shrink-0 bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center text-sm font-bold text-white">${escapeHtml((req.title || '?').charAt(0).toUpperCase())}</div>`;
+  const date = req.created_at ? new Date(req.created_at).toLocaleDateString() : '';
+  const requester = (state.currentRole === 'admin' && req.username) ? `<span class="text-xs text-slate-600">· ${escapeHtml(req.username)}</span>` : '';
+
+  const btns = [];
+  if (state.currentRole === 'admin' && (req.status === 'pending' || req.status === 'failed')) {
+    btns.push(`<button data-action="approveRequest" data-id="${req.id}" class="px-2.5 py-1 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded transition-colors whitespace-nowrap">${t('req_approve')}</button>`);
+  }
+  if (state.currentRole === 'admin' && req.status === 'failed') {
+    btns.push(`<button data-action="retryRequest" data-id="${req.id}" class="px-2.5 py-1 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded transition-colors whitespace-nowrap">${t('req_retry')}</button>`);
+  }
+  if (req.status !== 'completed' && req.status !== 'cancelled') {
+    btns.push(`<button data-action="cancelRequestItem" data-id="${req.id}" class="px-2.5 py-1 text-xs bg-slate-700 hover:bg-red-600 text-slate-300 hover:text-white rounded transition-colors whitespace-nowrap">${t('req_cancel')}</button>`);
+  }
+  if (state.currentRole === 'admin') {
+    btns.push(`<button data-action="deleteRequestItem" data-id="${req.id}" title="${t('remove')}" class="px-2 py-1 text-xs bg-slate-700 hover:bg-red-600 text-slate-300 hover:text-white rounded transition-colors">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    </button>`);
+  }
+
+  // Row can carry up to 4 buttons (Approve/Retry/Cancel/Delete) - too many
+  // to hold a fixed horizontal row at phone widths without overlapping the
+  // title/author text next to them, so this stacks to a column below
+  // sm rather than force everything onto one cramped line.
+  return `
+    <div class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+      <div class="flex items-center gap-4 min-w-0">
+        ${coverHtml}
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-0.5 flex-wrap">
+            <span class="px-2 py-0.5 rounded text-xs font-medium ${style.bg} ${style.text}">${escapeHtml(t('reqstatus_' + req.status))}</span>
+            ${date ? `<span class="text-xs text-slate-600">${date}</span>` : ''}
+            ${requester}
+          </div>
+          <h4 class="text-sm font-medium text-white truncate">${escapeHtml(req.title || '')}</h4>
+          ${req.author ? `<p class="text-xs text-slate-400 truncate">${escapeHtml(req.author)}</p>` : ''}
+          ${req.attention_note ? `<p class="text-xs text-red-400 mt-0.5 truncate" title="${escapeHtml(req.attention_note)}">${escapeHtml(req.attention_note)}</p>` : ''}
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0 flex-wrap sm:justify-end">${btns.join('')}</div>
+    </div>`;
+}
+
+async function approveRequest(id) {
+  try {
+    await apiJson(`/api/requests/${id}/approve`, { method: 'PUT' });
+    showToast(t('req_approved_toast'), 'success');
+    loadRequests(state.requestsFilter);
+    refreshRequestsBadge();
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('req_approve_failed'), 'error');
+  }
+}
+
+async function retryRequest(id) {
+  try {
+    await apiJson(`/api/requests/${id}/retry`, { method: 'PUT' });
+    showToast(t('req_retried_toast'), 'success');
+    loadRequests(state.requestsFilter);
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('req_retry_failed'), 'error');
+  }
+}
+
+async function cancelRequestItem(id) {
+  try {
+    await apiJson(`/api/requests/${id}/cancel`, { method: 'PUT' });
+    showToast(t('req_cancelled_toast'), 'success');
+    loadRequests(state.requestsFilter);
+    refreshRequestsBadge();
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('req_cancel_failed'), 'error');
+  }
+}
+
+async function deleteRequestItem(id) {
+  try {
+    await apiJson(`/api/requests/${id}`, { method: 'DELETE' });
+    showToast(t('req_deleted_toast'), 'success');
+    loadRequests(state.requestsFilter);
+    refreshRequestsBadge();
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('req_delete_failed'), 'error');
+  }
+}
+
+// ============================================================
 // SETTINGS
 // ============================================================
 async function loadSettings() {
@@ -2424,6 +3037,225 @@ async function loadSettings() {
   if (state.currentRole === 'admin') {
     loadUsers();
     loadInviteCodes();
+    loadWebhooks();
+    loadDuplicates();
+  }
+}
+
+// ------------------------------------------------------------
+// Notifications / Webhooks — Discord, ntfy, Pushover, or a generic
+// JSON receiver. The CRUD API and DB layer already supported any number
+// of named channels; this is its first UI (see internal/api/webhooks.go).
+// ------------------------------------------------------------
+async function loadWebhooks() {
+  try {
+    const data = await apiJson('/api/webhooks');
+    state.webhooks = data.webhooks || [];
+    document.getElementById('webhooks-section').classList.remove('hidden');
+    onWebhookTypeChange();
+    const container = document.getElementById('webhooks-list');
+    const emptyEl = document.getElementById('webhooks-empty');
+    if (state.webhooks.length === 0) {
+      container.innerHTML = '';
+      emptyEl.classList.remove('hidden');
+    } else {
+      emptyEl.classList.add('hidden');
+      container.innerHTML = state.webhooks.map(renderWebhookRow).join('');
+    }
+  } catch (err) {
+    // Non-admin gets a 403 - section stays hidden, same as User Management.
+  }
+}
+
+const WEBHOOK_TYPE_LABELS = { discord: 'Discord', ntfy: 'ntfy', pushover: 'Pushover', generic: 'Generic' };
+
+function renderWebhookRow(cfg) {
+  const target = cfg.type === 'pushover' ? t('s_wh_pushover_target') : (cfg.url || '');
+  return `
+    <div class="bg-slate-800/40 rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-0.5">
+          <span class="px-2 py-0.5 rounded text-xs font-medium bg-slate-700 text-slate-200">${escapeHtml(WEBHOOK_TYPE_LABELS[cfg.type] || cfg.type)}</span>
+          <h4 class="text-sm font-medium text-white truncate">${escapeHtml(cfg.name || '')}</h4>
+        </div>
+        <p class="text-xs text-slate-500 truncate">${escapeHtml(target)}</p>
+      </div>
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <label class="relative inline-flex items-center cursor-pointer shrink-0" title="${t('s_wh_enabled')}">
+          <input type="checkbox" class="sr-only peer" ${cfg.enabled ? 'checked' : ''} data-action-change="toggleWebhookEnabled" data-id="${cfg.id}">
+          <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+        </label>
+        <button data-action="testWebhookRow" data-id="${cfg.id}" class="px-2.5 py-1 text-xs bg-slate-700 hover:bg-indigo-600 text-slate-300 hover:text-white rounded transition-colors whitespace-nowrap">${t('s_send_test')}</button>
+        <button data-action="deleteWebhookItem" data-id="${cfg.id}" title="${t('remove')}" class="px-2 py-1 text-xs bg-slate-700 hover:bg-red-600 text-slate-300 hover:text-white rounded transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </button>
+      </div>
+    </div>`;
+}
+
+// Toggles which fields the add-webhook form shows: Pushover has no URL (a
+// fixed API endpoint) but needs a token + user key; ntfy has a URL (its
+// topic) plus an optional auth token; Discord/generic are URL-only.
+function onWebhookTypeChange() {
+  const type = document.getElementById('wh-type').value;
+  const urlField = document.getElementById('wh-url-field');
+  const urlLabel = document.getElementById('wh-url-label');
+  const urlInput = document.getElementById('wh-url');
+  const tokenField = document.getElementById('wh-token-field');
+  const tokenLabel = document.getElementById('wh-token-label');
+  const userkeyField = document.getElementById('wh-userkey-field');
+
+  if (type === 'pushover') {
+    urlField.classList.add('hidden');
+    tokenField.classList.remove('hidden');
+    tokenLabel.textContent = t('s_wh_token_pushover');
+    userkeyField.classList.remove('hidden');
+  } else if (type === 'ntfy') {
+    urlField.classList.remove('hidden');
+    urlLabel.textContent = t('s_wh_url_ntfy');
+    urlInput.placeholder = 'https://ntfy.sh/my-topic';
+    tokenField.classList.remove('hidden');
+    tokenLabel.textContent = t('s_wh_token_ntfy');
+    userkeyField.classList.add('hidden');
+  } else {
+    urlField.classList.remove('hidden');
+    urlLabel.textContent = t('s_wh_url');
+    urlInput.placeholder = type === 'discord' ? 'https://discord.com/api/webhooks/...' : 'https://example.com/webhook';
+    tokenField.classList.add('hidden');
+    userkeyField.classList.add('hidden');
+  }
+}
+
+function readWebhookForm() {
+  return {
+    name: document.getElementById('wh-name').value.trim(),
+    type: document.getElementById('wh-type').value,
+    url: document.getElementById('wh-url').value.trim(),
+    token: document.getElementById('wh-token').value.trim(),
+    user_key: document.getElementById('wh-userkey').value.trim(),
+    enabled: true,
+    events: '*',
+  };
+}
+
+async function addWebhook() {
+  const cfg = readWebhookForm();
+  try {
+    await apiJson('/api/webhooks', { method: 'POST', body: JSON.stringify(cfg) });
+    showToast(t('s_wh_added'), 'success');
+    document.getElementById('wh-name').value = '';
+    document.getElementById('wh-url').value = '';
+    document.getElementById('wh-token').value = '';
+    document.getElementById('wh-userkey').value = '';
+    loadWebhooks();
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(err.message || t('s_wh_add_failed'), 'error');
+  }
+}
+
+async function testWebhookForm() {
+  const cfg = readWebhookForm();
+  try {
+    await apiJson('/api/webhooks/test', { method: 'POST', body: JSON.stringify(cfg) });
+    showToast(t('s_wh_test_sent'), 'success');
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(err.message || t('s_wh_test_failed'), 'error');
+  }
+}
+
+async function testWebhookRow(id) {
+  const cfg = (state.webhooks || []).find(w => w.id === id);
+  if (!cfg) return;
+  try {
+    await apiJson('/api/webhooks/test', { method: 'POST', body: JSON.stringify(cfg) });
+    showToast(t('s_wh_test_sent'), 'success');
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('s_wh_test_failed'), 'error');
+  }
+}
+
+async function toggleWebhookEnabled(id, enabled) {
+  const cfg = (state.webhooks || []).find(w => w.id === id);
+  if (!cfg) return;
+  try {
+    await apiJson(`/api/webhooks/${id}`, { method: 'PUT', body: JSON.stringify({ ...cfg, enabled }) });
+    cfg.enabled = enabled;
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('s_wh_update_failed'), 'error');
+    loadWebhooks(); // resync the toggle's visual state after a failed save
+  }
+}
+
+async function deleteWebhookItem(id) {
+  try {
+    await apiJson(`/api/webhooks/${id}`, { method: 'DELETE' });
+    showToast(t('s_wh_deleted'), 'success');
+    loadWebhooks();
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('s_wh_delete_failed'), 'error');
+  }
+}
+
+// ------------------------------------------------------------
+// Duplicate Finder — the same signals documented (as manual sqlite3
+// queries) in docs/library-duplicate-report.md, exposed as a real
+// endpoint + UI instead of something only reachable with the raw DB file.
+// ------------------------------------------------------------
+async function loadDuplicates() {
+  try {
+    const data = await apiJson('/api/library/duplicates');
+    const groups = data.groups || [];
+    document.getElementById('duplicates-section').classList.remove('hidden');
+    const container = document.getElementById('duplicates-list');
+    const emptyEl = document.getElementById('duplicates-empty');
+    if (groups.length === 0) {
+      container.innerHTML = '';
+      emptyEl.classList.remove('hidden');
+    } else {
+      emptyEl.classList.add('hidden');
+      container.innerHTML = groups.map(renderDuplicateGroup).join('');
+    }
+  } catch (err) {
+    // Non-admin gets a 403 - section stays hidden.
+  }
+}
+
+const DUPLICATE_REASON_KEYS = {
+  same_path: 's_dupes_reason_path',
+  same_content: 's_dupes_reason_content',
+  same_title_author: 's_dupes_reason_title',
+};
+
+function renderDuplicateGroup(group) {
+  const reasonLabel = t(DUPLICATE_REASON_KEYS[group.reason] || group.reason);
+  return `
+    <div class="border border-slate-800 rounded-lg overflow-hidden">
+      <div class="px-3 py-2 bg-slate-800/60 text-xs font-medium text-slate-300 uppercase tracking-wide">${escapeHtml(reasonLabel)}</div>
+      <div class="divide-y divide-slate-800">${(group.items || []).map(renderDuplicateItem).join('')}</div>
+    </div>`;
+}
+
+function renderDuplicateItem(item) {
+  const size = item.file_size ? formatSize(item.file_size) : '';
+  const subtitle = [item.author, item.file_format, size].filter(Boolean).map(escapeHtml).join(' · ');
+  return `
+    <div class="px-3 py-2 flex items-center gap-3">
+      <div class="flex-1 min-w-0">
+        <h4 class="text-sm text-white truncate">${escapeHtml(item.title || '(untitled)')}</h4>
+        ${subtitle ? `<p class="text-xs text-slate-500 truncate">${subtitle}</p>` : ''}
+        <p class="text-xs text-slate-600 truncate" title="${escapeHtml(item.file_path || '')}">${escapeHtml(item.file_path || '')}</p>
+      </div>
+      <button data-action="deleteDuplicateItem" data-id="${item.id}" class="px-2.5 py-1 text-xs bg-slate-700 hover:bg-red-600 text-slate-300 hover:text-white rounded transition-colors whitespace-nowrap">${t('s_dupes_delete_item')}</button>
+    </div>`;
+}
+
+async function deleteDuplicateItem(id) {
+  try {
+    await apiJson(`/api/library/book/${id}`, { method: 'DELETE' });
+    showToast(t('s_dupes_item_deleted'), 'success');
+    loadDuplicates();
+  } catch (err) {
+    if (err.message !== 'Unauthorized') showToast(t('s_dupes_delete_failed'), 'error');
   }
 }
 
@@ -2911,13 +3743,13 @@ async function loadUsers() {
       const totpBadge = u.totp_enabled ? '<span class="text-xs text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">2FA</span>' : '';
       const lastLogin = u.last_login ? new Date(u.last_login).toLocaleDateString() : t('never');
       return `
-        <div class="flex items-center justify-between bg-slate-800/50 rounded-lg px-4 py-3">
-          <div class="flex items-center gap-3">
-            <span class="text-sm font-medium text-white">${escapeHtml(u.username)}</span>
+        <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-800/50 rounded-lg px-4 py-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="text-sm font-medium text-white truncate">${escapeHtml(u.username)}</span>
             ${totpBadge}
-            <span class="text-xs text-slate-600">${t('last_login', {date: lastLogin})}</span>
+            <span class="text-xs text-slate-600 whitespace-nowrap">${t('last_login', {date: lastLogin})}</span>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 shrink-0">
             ${roleOptions}
             <button data-action="deleteUser" data-id="${u.id}" data-username="${escapeHtml(u.username)}" class="px-2 py-1 text-xs bg-slate-700 hover:bg-red-600 text-slate-400 hover:text-white rounded transition-colors" title="${t('failed_delete_user')}">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -3146,6 +3978,7 @@ async function init() {
 
     // Auth OK
     loadStats();
+    refreshRequestsBadge();
     // Show default tab
     document.getElementById('search-empty').classList.remove('hidden');
     // Apply language on load
@@ -3200,6 +4033,7 @@ const CLICK_ACTIONS = {
   },
   retryDownload: el => retryDownload(el.dataset.jobId),
   openDiscoverDetail: el => openDiscoverDetail(+el.dataset.idx),
+  openRecommendedBook: el => openRecommendedBook(+el.dataset.idx),
   hideDiscoverModal: () => hideDiscoverModal(),
   requestDiscoverBook: () => requestDiscoverBook(),
   watchDiscoverBook: () => watchDiscoverBook(),
@@ -3212,6 +4046,21 @@ const CLICK_ACTIONS = {
   deleteUser: el => deleteUser(+el.dataset.id, el.dataset.username),
   copyInviteCode: el => copyInviteCode(el.dataset.code),
   revokeInviteCode: el => revokeInviteCode(+el.dataset.id),
+  addTrackedAuthor: () => addTrackedAuthor(),
+  deleteTrackedAuthor: el => deleteTrackedAuthor(+el.dataset.id, el.dataset.name),
+  checkAuthorNow: el => checkAuthorNow(+el.dataset.id),
+  searchSeriesGap: el => searchSeriesGap(el.dataset.name),
+  switchRequestsFilter: el => switchRequestsFilter(el.dataset.arg),
+  approveRequest: el => approveRequest(el.dataset.id),
+  retryRequest: el => retryRequest(el.dataset.id),
+  cancelRequestItem: el => cancelRequestItem(el.dataset.id),
+  deleteRequestItem: el => deleteRequestItem(el.dataset.id),
+  addWebhook: () => addWebhook(),
+  testWebhookForm: () => testWebhookForm(),
+  testWebhookRow: el => testWebhookRow(+el.dataset.id),
+  deleteWebhookItem: el => deleteWebhookItem(+el.dataset.id),
+  loadDuplicates: () => loadDuplicates(),
+  deleteDuplicateItem: el => deleteDuplicateItem(+el.dataset.id),
 };
 
 document.addEventListener('click', e => {
@@ -3229,6 +4078,8 @@ const CHANGE_ACTIONS = {
   toggleForeignLangFilter: () => toggleForeignLangFilter(),
   toggleRemoveTorrent: () => toggleRemoveTorrent(),
   saveImportMode: () => saveImportMode(),
+  onWebhookTypeChange: () => onWebhookTypeChange(),
+  toggleWebhookEnabled: el => toggleWebhookEnabled(+el.dataset.id, el.checked),
 };
 
 document.addEventListener('change', e => {
@@ -3243,6 +4094,23 @@ document.addEventListener('change', e => {
 document.addEventListener('error', e => {
   const img = e.target;
   if (img instanceof HTMLImageElement && img.dataset.phTitle !== undefined) {
-    img.outerHTML = window.makePlaceholder(img.dataset.phTitle, +(img.dataset.phIdx || 0));
+    img.outerHTML = window.makePlaceholder(img.dataset.phTitle, +(img.dataset.phIdx || 0), img.dataset.phSize || 'card');
+  }
+}, true);
+
+// Open Library's cover API doesn't 404 for a work with no cover art - it
+// serves a real 1x1 pixel image with a 200 status (most often hit via the
+// OLID-derived URL the Discover detail modal uses, which is a worse guess
+// than the numeric cover_i URL a search result may already have had). That
+// never fires 'error', so the fallback above never ran for it and the
+// cover just silently went blank the moment you opened a book's
+// description. 'load' doesn't bubble either, hence the same capture-phase
+// delegation, gated to naturally-tiny images so a real (if small) cover
+// isn't mistaken for a missing one.
+document.addEventListener('load', e => {
+  const img = e.target;
+  if (img instanceof HTMLImageElement && img.dataset.phTitle !== undefined
+      && img.naturalWidth <= 1 && img.naturalHeight <= 1) {
+    img.outerHTML = window.makePlaceholder(img.dataset.phTitle, +(img.dataset.phIdx || 0), img.dataset.phSize || 'card');
   }
 }, true);

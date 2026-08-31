@@ -23,7 +23,7 @@ func (c *Client) SearchMulti(ctx context.Context, query string, limit int) ([]mo
 
 	q := req.URL.Query()
 	q.Set("q", query)
-	q.Set("fields", "key,title,author_name,first_publish_year,cover_i,isbn,publisher,language,number_of_pages_median,subject")
+	q.Set("fields", "key,title,author_name,first_publish_year,cover_i,isbn,publisher,language,number_of_pages_median,subject,ratings_average,ratings_count")
 	q.Set("limit", fmt.Sprintf("%d", limit))
 	req.URL.RawQuery = q.Encode()
 	req.Header.Set("User-Agent", "Librarr/2.0 (book download manager; github.com/JeremiahM37/librarr)")
@@ -67,6 +67,10 @@ func (c *Client) SearchMulti(ctx context.Context, query string, limit int) ([]mo
 		}
 		if doc.FirstPublishYear > 0 {
 			r.PublishedDate = fmt.Sprintf("%d", doc.FirstPublishYear)
+		}
+		if doc.RatingsCount > 0 {
+			r.Rating = doc.RatingsAverage
+			r.RatingsCount = doc.RatingsCount
 		}
 		results = append(results, r)
 	}
@@ -146,7 +150,7 @@ func (c *Client) GetWork(ctx context.Context, workKey string) (*models.DiscoverR
 	meta := &BookMetadata{OLID: workKey}
 	c.enrichFromWork(ctx, workKey, meta)
 
-	return &models.DiscoverResult{
+	result := &models.DiscoverResult{
 		Source:      "open_library",
 		SourceID:    workKey,
 		Title:       meta.Title,
@@ -155,5 +159,14 @@ func (c *Client) GetWork(ctx context.Context, workKey string) (*models.DiscoverR
 		Description: meta.Description,
 		ISBN:        meta.ISBN,
 		PageCount:   meta.PageCount,
-	}, nil
+	}
+
+	// Not returned by the search endpoint for a single work-key lookup - a
+	// separate call, best-effort (see fetchWorkRatings).
+	if avg, count := c.fetchWorkRatings(ctx, workKey); count > 0 {
+		result.Rating = avg
+		result.RatingsCount = count
+	}
+
+	return result, nil
 }

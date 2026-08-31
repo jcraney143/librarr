@@ -366,7 +366,7 @@ func TestTest_SendsTestPayload(t *testing.T) {
 	defer server.Close()
 
 	sender := NewSender()
-	err := sender.Test(server.URL, "generic")
+	err := sender.Test(Config{URL: server.URL, Type: "generic"})
 	if err != nil {
 		t.Fatalf("Test failed: %v", err)
 	}

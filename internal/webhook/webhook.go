@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
+	"strings"
 	"sync"
 	"time"
 )
@@ -30,10 +32,18 @@ const (
 type Config struct {
 	ID      int64  `json:"id"`
 	Name    string `json:"name"`
-	URL     string `json:"url"`
-	Type    string `json:"type"` // "discord" or "generic"
+	URL     string `json:"url"`  // ntfy: the full topic URL, e.g. https://ntfy.sh/my-topic. Unused for pushover.
+	Type    string `json:"type"` // "discord", "generic", "ntfy", or "pushover"
 	Enabled bool   `json:"enabled"`
 	Events  string `json:"events"` // comma-separated event types, or "*" for all
+
+	// Token and UserKey are only used by types that need more than a URL:
+	// pushover requires an app Token and a per-account UserKey (there is no
+	// single URL to POST to - both go to the same fixed API endpoint).
+	// ntfy optionally uses Token as a Bearer auth token for a protected
+	// topic; UserKey is unused for ntfy.
+	Token   string `json:"token,omitempty"`
+	UserKey string `json:"user_key,omitempty"`
 }
 
 // Payload is the data sent to webhooks.
@@ -107,9 +117,14 @@ func (s *Sender) Send(payload Payload) {
 	}
 }
 
-// Test sends a test payload to a specific webhook URL.
-func (s *Sender) Test(url, webhookType string) error {
-	cfg := Config{URL: url, Type: webhookType, Enabled: true, Events: "*"}
+// Test sends a test payload using a full config (URL/Token/UserKey - not
+// just a URL - since Pushover has no URL to speak of, and ntfy's optional
+// auth token needs to be tested the same way it will actually be sent).
+func (s *Sender) Test(cfg Config) error {
+	cfg.Enabled = true
+	if cfg.Events == "" {
+		cfg.Events = "*"
+	}
 	payload := Payload{
 		Event:     EventInfo,
 		Title:     "Librarr Webhook Test",
@@ -121,41 +136,107 @@ func (s *Sender) Test(url, webhookType string) error {
 }
 
 func (s *Sender) send(cfg Config, payload Payload) error {
-	var body []byte
-	var err error
-
-	if cfg.Type == "discord" {
-		body, err = json.Marshal(buildDiscordEmbed(payload))
-	} else {
-		body, err = json.Marshal(payload)
-	}
+	req, err := buildWebhookRequest(cfg, payload)
 	if err != nil {
-		slog.Error("webhook marshal error", "url", cfg.URL, "error", err)
+		slog.Error("webhook build error", "type", cfg.Type, "url", cfg.URL, "error", err)
 		return err
 	}
-
-	req, err := http.NewRequest("POST", cfg.URL, bytes.NewReader(body))
-	if err != nil {
-		slog.Error("webhook request error", "url", cfg.URL, "error", err)
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "Librarr/2.0")
 
 	resp, err := s.client.Do(req)
 	if err != nil {
-		slog.Error("webhook send error", "url", cfg.URL, "error", err)
+		slog.Error("webhook send error", "type", cfg.Type, "url", cfg.URL, "error", err)
 		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
-		slog.Warn("webhook returned error status", "url", cfg.URL, "status", resp.StatusCode)
+		slog.Warn("webhook returned error status", "type", cfg.Type, "url", cfg.URL, "status", resp.StatusCode)
 		return fmt.Errorf("webhook returned status %d", resp.StatusCode)
 	}
 
-	slog.Debug("webhook sent", "url", cfg.URL, "event", payload.Event)
+	slog.Debug("webhook sent", "type", cfg.Type, "url", cfg.URL, "event", payload.Event)
 	return nil
+}
+
+// pushoverAPI is Pushover's one fixed endpoint for every account - unlike
+// the other channel types, there's no per-config URL, just the app token
+// and user key carried in the request body.
+const pushoverAPI = "https://api.pushover.net/1/messages.json"
+
+// buildWebhookRequest constructs the outbound HTTP request for one
+// notification channel type. Each has its own wire format: Discord wants
+// an embed, ntfy wants plain text with headers, Pushover wants a
+// form-encoded POST to its fixed endpoint, and "generic" gets the raw
+// Payload as JSON for any webhook-compatible receiver.
+func buildWebhookRequest(cfg Config, payload Payload) (*http.Request, error) {
+	switch cfg.Type {
+	case "discord":
+		body, err := json.Marshal(buildDiscordEmbed(payload))
+		if err != nil {
+			return nil, err
+		}
+		req, err := http.NewRequest("POST", cfg.URL, bytes.NewReader(body))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("User-Agent", "Librarr/2.0")
+		return req, nil
+
+	case "ntfy":
+		req, err := http.NewRequest("POST", cfg.URL, strings.NewReader(payload.Message))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Title", payload.Title)
+		req.Header.Set("Priority", ntfyPriority(payload.Status))
+		if payload.Status == "failed" {
+			req.Header.Set("Tags", "x") // renders as a red X icon
+		}
+		if cfg.Token != "" {
+			req.Header.Set("Authorization", "Bearer "+cfg.Token)
+		}
+		req.Header.Set("User-Agent", "Librarr/2.0")
+		return req, nil
+
+	case "pushover":
+		form := url.Values{
+			"token":   {cfg.Token},
+			"user":    {cfg.UserKey},
+			"title":   {payload.Title},
+			"message": {payload.Message},
+		}
+		if payload.Status == "failed" {
+			form.Set("priority", "1") // high priority - bypasses quiet hours
+		}
+		req, err := http.NewRequest("POST", pushoverAPI, strings.NewReader(form.Encode()))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req.Header.Set("User-Agent", "Librarr/2.0")
+		return req, nil
+
+	default: // "generic"
+		body, err := json.Marshal(payload)
+		if err != nil {
+			return nil, err
+		}
+		req, err := http.NewRequest("POST", cfg.URL, bytes.NewReader(body))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("User-Agent", "Librarr/2.0")
+		return req, nil
+	}
+}
+
+func ntfyPriority(status string) string {
+	if status == "failed" {
+		return "high"
+	}
+	return "default"
 }
 
 // Discord embed format.

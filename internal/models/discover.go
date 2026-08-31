@@ -19,6 +19,19 @@ type DiscoverResult struct {
 	Categories    []string `json:"categories,omitempty"`
 	PublishedDate string   `json:"published_date,omitempty"` // as reported by the source; not always a full date
 
+	// Rating is the source's average rating (0-5) and vote count, when the
+	// source reports one. Google Books includes it on every search result;
+	// Open Library only reliably has it per-work (see GetWork), so list
+	// results from Open Library usually leave this zero.
+	Rating       float64 `json:"rating,omitempty"`
+	RatingsCount int     `json:"ratings_count,omitempty"`
+
+	// Recommended is populated only on a detail fetch (GetDetail) - a short
+	// list of other books by the same author, for the "More by this author"
+	// section for the modal. Deliberately not attempted on search/browse
+	// list results, which would mean N extra lookups per grid of results.
+	Recommended []DiscoverResult `json:"recommended,omitempty"`
+
 	// Ownership, resolved against library_items at response time. Mirrors
 	// SearchResult's InLibrary/LibraryItemID/LibraryTitle convention - see
 	// annotateOwnership in internal/api/ownership.go.

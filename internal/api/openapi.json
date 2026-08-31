@@ -259,6 +259,8 @@
 
     "/api/authors":         {"get": {"summary": "List monitored authors"}},
     "/api/authors/{id}":    {"delete": {"summary": "Unmonitor an author"}},
+    "/api/authors/{id}/check": {"post": {"summary": "Check one monitored author now, bypassing its interval"}},
+    "/api/authors/releases":   {"get": {"summary": "Recent releases found for monitored authors (Calendar feed)"}},
     "/api/series":          {"get": {"summary": "List series with completeness"}},
     "/api/series/{name}/missing": {"get": {"summary": "Missing volumes in a series"}},
 

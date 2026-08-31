@@ -227,6 +227,35 @@ func (c *Client) enrichFromWork(ctx context.Context, workKey string, meta *BookM
 	}
 }
 
+// fetchWorkRatings fetches a work's aggregate rating for the Discover detail
+// modal. Best-effort: a work with no ratings yet, or a network hiccup, just
+// leaves the rating at zero rather than failing the whole detail fetch.
+func (c *Client) fetchWorkRatings(ctx context.Context, workKey string) (average float64, count int) {
+	url := "https://openlibrary.org" + workKey + "/ratings.json"
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return 0, 0
+	}
+	req.Header.Set("User-Agent", "Librarr/2.0 (book download manager; github.com/JeremiahM37/librarr)")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		slog.Debug("metadata work ratings fetch failed", "key", workKey, "error", err)
+		return 0, 0
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return 0, 0
+	}
+
+	var ratings olRatingsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ratings); err != nil {
+		return 0, 0
+	}
+	return ratings.Summary.Average, ratings.Summary.Count
+}
+
 // Open Library API response types.
 
 type olSearchResponse struct {
@@ -243,6 +272,19 @@ type olSearchDoc struct {
 	Publisher           []string `json:"publisher"`
 	Language            []string `json:"language"`
 	NumberOfPagesMedian int      `json:"number_of_pages_median"`
+	RatingsAverage      float64  `json:"ratings_average"`
+	RatingsCount        int      `json:"ratings_count"`
+}
+
+// olRatingsResponse is the shape of
+// https://openlibrary.org/works/{id}/ratings.json - not returned by the
+// search endpoint's "fields" param for a single work lookup by key, so
+// GetWork fetches it separately for the Discover detail modal.
+type olRatingsResponse struct {
+	Summary struct {
+		Average float64 `json:"average"`
+		Count   int     `json:"count"`
+	} `json:"summary"`
 }
 
 type olWork struct {
@@ -276,5 +318,13 @@ func truncate(s string, maxLen int) string {
 	if len(s) <= maxLen {
 		return s
 	}
-	return s[:maxLen] + "..."
+	cut := s[:maxLen]
+	// Back off to the last word boundary so a hard cutoff doesn't land
+	// mid-word (e.g. "...inheritanc..." instead of "...inheritance...") -
+	// noticeable now that the Discover modal shows this text at full size
+	// with room to spare, not just as a compact list subtitle.
+	if idx := strings.LastIndexByte(cut, ' '); idx > 0 {
+		cut = cut[:idx]
+	}
+	return cut + "..."
 }

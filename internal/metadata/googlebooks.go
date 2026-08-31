@@ -157,6 +157,8 @@ type gbVolume struct {
 		PublishedDate       string   `json:"publishedDate"`
 		PageCount           int      `json:"pageCount"`
 		Categories          []string `json:"categories"`
+		AverageRating       float64  `json:"averageRating"`
+		RatingsCount        int      `json:"ratingsCount"`
 		IndustryIdentifiers []struct {
 			Type       string `json:"type"`
 			Identifier string `json:"identifier"`
@@ -177,6 +179,8 @@ func (v gbVolume) toDiscoverResult() models.DiscoverResult {
 		PublishedDate: v.VolumeInfo.PublishedDate,
 		PageCount:     v.VolumeInfo.PageCount,
 		Categories:    v.VolumeInfo.Categories,
+		Rating:        v.VolumeInfo.AverageRating,
+		RatingsCount:  v.VolumeInfo.RatingsCount,
 	}
 	if len(v.VolumeInfo.Authors) > 0 {
 		r.Author = strings.Join(v.VolumeInfo.Authors, ", ")

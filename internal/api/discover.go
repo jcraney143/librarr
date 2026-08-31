@@ -40,8 +40,13 @@ func (s *Server) handleDiscoverDetail(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{"error": "unknown source"})
 		return
 	}
+	// The frontend already has the author from the summary card that was
+	// clicked to open this detail - passed through as a hint since Open
+	// Library's work-detail lookup can't resolve it on its own (see
+	// DiscoverService.GetDetail).
+	author := strings.TrimSpace(r.URL.Query().Get("author"))
 
-	result, err := s.discover.GetDetail(r.Context(), source, id)
+	result, err := s.discover.GetDetail(r.Context(), source, id, author)
 	if err != nil {
 		writeJSON(w, http.StatusBadGateway, map[string]interface{}{"error": "Failed to fetch book detail"})
 		return
@@ -53,6 +58,9 @@ func (s *Server) handleDiscoverDetail(w http.ResponseWriter, r *http.Request) {
 
 	results := []models.DiscoverResult{*result}
 	s.annotateDiscoverResults(results)
+	if len(results[0].Recommended) > 0 {
+		s.annotateDiscoverResults(results[0].Recommended)
+	}
 
 	writeJSON(w, http.StatusOK, results[0])
 }
