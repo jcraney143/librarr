@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -41,7 +42,24 @@ func opdsNow() string {
 	return time.Now().UTC().Format("2006-01-02T15:04:05Z")
 }
 
-func opdsFeedOpen(feedID, title, kind, selfHref string, total, page int) string {
+// opdsHref appends the configured API key to an OPDS link, so pagination,
+// subsection, and download links stay authenticated across clicks. An
+// e-reader's OPDS client has no way to log in and hold a session cookie -
+// the key has to travel in the URL itself, request to request. A path
+// with no key configured is returned unchanged (matches authMiddleware's
+// "open instance" bypass for pure-LAN/no-auth setups).
+func opdsHref(path, apiKey string) string {
+	if apiKey == "" {
+		return path
+	}
+	sep := "?"
+	if strings.Contains(path, "?") {
+		sep = "&"
+	}
+	return path + sep + "apikey=" + url.QueryEscape(apiKey)
+}
+
+func opdsFeedOpen(feedID, title, kind, selfHref, apiKey string, total, page int) string {
 	mime := opdsNavMIME
 	if kind == "acquisition" {
 		mime = opdsAcqMIME
@@ -57,13 +75,15 @@ func opdsFeedOpen(feedID, title, kind, selfHref string, total, page int) string 
   <updated>%s</updated>
   <author><name>Librarr</name></author>
   <link rel="self" href="%s" type="%s"/>
-  <link rel="start" href="/opds/" type="%s"/>
-  <link rel="search" href="/opds/opensearch.xml" type="%s"/>
+  <link rel="start" href="%s" type="%s"/>
+  <link rel="search" href="%s" type="%s"/>
   <opensearch:totalResults>%d</opensearch:totalResults>
   <opensearch:itemsPerPage>%d</opensearch:itemsPerPage>
   <opensearch:startIndex>%d</opensearch:startIndex>
 `, xmlEscape(feedID), xmlEscape(title), opdsNow(),
-		xmlEscape(selfHref), mime, opdsNavMIME, opdsOSMIME,
+		xmlEscape(opdsHref(selfHref, apiKey)), mime,
+		xmlEscape(opdsHref("/opds/", apiKey)), opdsNavMIME,
+		xmlEscape(opdsHref("/opds/opensearch.xml", apiKey)), opdsOSMIME,
 		total, opdsPageSize, startIndex)
 }
 
@@ -83,16 +103,17 @@ func (s *Server) handleOPDSRoot(w http.ResponseWriter, _ *http.Request) {
 	totalBooks, _ := s.db.CountItems("ebook")
 	totalAudio, _ := s.db.CountItems("audiobook")
 	total := totalBooks + totalAudio
+	apiKey := s.cfg.APIKey
 
-	body := opdsFeedOpen("", "Librarr", "navigation", "/opds/", total, 1)
+	body := opdsFeedOpen("", "Librarr", "navigation", "/opds/", apiKey, total, 1)
 	body += opdsNavEntry("library", fmt.Sprintf("My Library (%d items)", total),
-		"Browse your downloaded books and audiobooks", "/opds/books", opdsAcqMIME)
+		"Browse your downloaded books and audiobooks", opdsHref("/opds/books", apiKey), opdsAcqMIME)
 	body += opdsNavEntry("ebooks", fmt.Sprintf("Ebooks (%d)", totalBooks),
-		"Browse ebooks", "/opds/books?type=ebook", opdsAcqMIME)
+		"Browse ebooks", opdsHref("/opds/books?type=ebook", apiKey), opdsAcqMIME)
 	body += opdsNavEntry("audiobooks", fmt.Sprintf("Audiobooks (%d)", totalAudio),
-		"Browse audiobooks", "/opds/books?type=audiobook", opdsAcqMIME)
+		"Browse audiobooks", opdsHref("/opds/books?type=audiobook", apiKey), opdsAcqMIME)
 	body += opdsNavEntry("search", "Search",
-		"Search for new books", "/opds/search?q={searchTerms}", opdsAcqMIME)
+		"Search for new books", opdsHref("/opds/search?q={searchTerms}", apiKey), opdsAcqMIME)
 	body += "</feed>"
 
 	w.Header().Set("Content-Type", "application/atom+xml; charset=utf-8")
@@ -109,13 +130,14 @@ func (s *Server) handleOPDSBooks(w http.ResponseWriter, r *http.Request) {
 
 	items, _ := s.db.GetItems(mediaType, opdsPageSize, offset)
 	total, _ := s.db.CountItems(mediaType)
+	apiKey := s.cfg.APIKey
 
 	selfHref := fmt.Sprintf("/opds/books?page=%d", page)
 	if mediaType != "" {
 		selfHref += "&type=" + mediaType
 	}
 
-	body := opdsFeedOpen("library", "My Library", "acquisition", selfHref, total, page)
+	body := opdsFeedOpen("library", "My Library", "acquisition", selfHref, apiKey, total, page)
 
 	// Pagination links.
 	if page > 1 {
@@ -124,7 +146,7 @@ func (s *Server) handleOPDSBooks(w http.ResponseWriter, r *http.Request) {
 			prevHref += "&type=" + mediaType
 		}
 		body += fmt.Sprintf("  <link rel=\"previous\" href=\"%s\" type=\"%s\"/>\n",
-			xmlEscape(prevHref), opdsAcqMIME)
+			xmlEscape(opdsHref(prevHref, apiKey)), opdsAcqMIME)
 	}
 	if offset+opdsPageSize < total {
 		nextHref := fmt.Sprintf("/opds/books?page=%d", page+1)
@@ -132,7 +154,7 @@ func (s *Server) handleOPDSBooks(w http.ResponseWriter, r *http.Request) {
 			nextHref += "&type=" + mediaType
 		}
 		body += fmt.Sprintf("  <link rel=\"next\" href=\"%s\" type=\"%s\"/>\n",
-			xmlEscape(nextHref), opdsAcqMIME)
+			xmlEscape(opdsHref(nextHref, apiKey)), opdsAcqMIME)
 	}
 
 	for _, item := range items {
@@ -158,12 +180,13 @@ func (s *Server) handleOPDSBooks(w http.ResponseWriter, r *http.Request) {
     <updated>%s</updated>
 %s    <dc:format>%s</dc:format>
     <link rel="http://opds-spec.org/acquisition"
-          href="/opds/download/%d"
+          href="%s"
           type="%s"/>
   </entry>
 `, xmlEscape(item.Title), item.ID,
 			item.AddedAt.UTC().Format("2006-01-02T15:04:05Z"),
-			authorXML, xmlEscape(mime), item.ID, xmlEscape(mime))
+			authorXML, xmlEscape(mime),
+			xmlEscape(opdsHref(fmt.Sprintf("/opds/download/%d", item.ID), apiKey)), xmlEscape(mime))
 	}
 
 	body += "</feed>"
@@ -179,9 +202,10 @@ func (s *Server) handleOPDSSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	results, _ := s.searchMgr.Search(r.Context(), "main", query)
+	apiKey := s.cfg.APIKey
 
 	body := opdsFeedOpen("search", fmt.Sprintf("Search: %s", query), "acquisition",
-		fmt.Sprintf("/opds/search?q=%s", xmlEscape(query)), len(results), 1)
+		fmt.Sprintf("/opds/search?q=%s", xmlEscape(query)), apiKey, len(results), 1)
 
 	for i, r := range results {
 		if i >= 50 {
@@ -289,15 +313,16 @@ func (s *Server) handleOPDSDownload(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleOPDSOpenSearch(w http.ResponseWriter, _ *http.Request) {
-	xml := `<?xml version="1.0" encoding="UTF-8"?>
+	template := opdsHref("/opds/search?q={searchTerms}", s.cfg.APIKey)
+	xml := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
   <ShortName>Librarr</ShortName>
   <Description>Search Librarr for books, audiobooks, and web novels</Description>
   <InputEncoding>UTF-8</InputEncoding>
   <OutputEncoding>UTF-8</OutputEncoding>
   <Url type="application/atom+xml;profile=opds-catalog;kind=acquisition"
-       template="/opds/search?q={searchTerms}"/>
-</OpenSearchDescription>`
+       template="%s"/>
+</OpenSearchDescription>`, xmlEscape(template))
 	w.Header().Set("Content-Type", "application/opensearchdescription+xml; charset=utf-8")
 	w.Write([]byte(xml))
 }

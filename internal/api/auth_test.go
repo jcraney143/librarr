@@ -290,8 +290,16 @@ func TestIsExempt(t *testing.T) {
 		{"/torznab/api", true},
 		{"/torznab/api?t=caps", true},
 		{"/static/style.css", true},
-		{"/opds", true},
-		{"/opds/books", true},
+		// OPDS is no longer unconditionally exempt: it used to bypass auth
+		// entirely regardless of what auth is configured, which meant the
+		// whole library (including direct download links) was reachable
+		// with no login once Librarr is tunneled publicly. It now goes
+		// through the normal auth chain like everything else - the "open
+		// instance" bypass in authMiddleware still covers pure-LAN/no-auth
+		// setups, and opds.go stamps ?apikey= onto every link it emits once
+		// an API key is configured, so isExempt itself should say false here.
+		{"/opds", false},
+		{"/opds/books", false},
 		{"/metrics", true},
 		{"/auth/oidc/callback", true},
 		// OpenAPI spec is public so AI agents / tooling can introspect the

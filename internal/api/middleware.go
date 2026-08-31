@@ -41,10 +41,17 @@ func isExempt(path string) bool {
 	if strings.HasPrefix(path, "/static/") {
 		return true
 	}
-	// OPDS feeds (e-readers handle auth separately).
-	if strings.HasPrefix(path, "/opds") {
-		return true
-	}
+	// OPDS feeds used to be unconditionally exempt here ("e-readers handle
+	// auth separately") but nothing actually enforced that - the comment
+	// was aspirational. Now that Librarr can be tunneled publicly (see
+	// SETUP.md), that left the entire library, including direct download
+	// links, reachable by anyone with no login at all. OPDS now goes
+	// through the normal chain below: the "open instance" bypass still
+	// covers pure-LAN/no-auth setups, and once an API key is configured,
+	// opds.go stamps ?apikey= onto every link it emits so an e-reader's
+	// OPDS client (which has no way to hold a login session) stays
+	// authenticated across clicks without needing Basic Auth support.
+
 	// Prometheus metrics.
 	if path == "/metrics" {
 		return true
