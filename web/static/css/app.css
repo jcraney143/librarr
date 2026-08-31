@@ -92,7 +92,12 @@
     main.flex-1 { padding-left: 0.75rem; padding-right: 0.75rem; }
   }
 
-  @media (max-width: 768px) {
-    /* Slightly smaller grid for tablets */
+  @media (min-width: 641px) and (max-width: 768px) {
+    /* Slightly smaller grid for tablets. Deliberately excludes the phone
+       range (<=640px) - it used to be a plain max-width:768px query, which
+       overlaps the mobile block above and, being later in source order,
+       silently won on every phone-width screen too: 3 columns of ~110px
+       each with button labels ("Downlo...") clipped, instead of the
+       2-column (or 1-column under 400px) layout the mobile block sets. */
     #search-results { grid-template-columns: repeat(3, 1fr) !important; }
   }
