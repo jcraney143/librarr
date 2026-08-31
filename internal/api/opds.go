@@ -42,13 +42,44 @@ func opdsNow() string {
 	return time.Now().UTC().Format("2006-01-02T15:04:05Z")
 }
 
-// opdsHref appends the configured API key to an OPDS link, so pagination,
-// subsection, and download links stay authenticated across clicks. An
-// e-reader's OPDS client has no way to log in and hold a session cookie -
-// the key has to travel in the URL itself, request to request. A path
-// with no key configured is returned unchanged (matches authMiddleware's
-// "open instance" bypass for pure-LAN/no-auth setups).
-func opdsHref(path, apiKey string) string {
+// opdsBaseURL derives scheme://host from the incoming request, so OPDS
+// links can be emitted as absolute URLs. Relative hrefs are technically
+// legal in Atom (resolved against the feed's own URL per RFC 4287/3986),
+// but CrossPoint's OPDS parser - built for an ESP32, not a general-purpose
+// HTTP library - doesn't reliably do that resolution. A relative
+// <link rel="self"> in particular has been observed failing feed
+// validation on-device ("Failed to fetch feed") even though the same URL
+// fetches a well-formed feed in a browser.
+//
+// No trusted-proxy gate on X-Forwarded-Proto here, unlike isSecureRequest
+// in sso_proxy.go: getting the scheme wrong only affects which scheme
+// shows up in a link *we hand back to the same client that asked* - there's
+// no cookie or auth decision riding on it, so a spoofed header has nothing
+// to gain.
+func opdsBaseURL(r *http.Request) string {
+	if r == nil || r.Host == "" {
+		return ""
+	}
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	} else if proto := strings.TrimSpace(strings.Split(r.Header.Get("X-Forwarded-Proto"), ",")[0]); strings.EqualFold(proto, "https") {
+		scheme = "https"
+	}
+	return scheme + "://" + r.Host
+}
+
+// opdsHref makes an OPDS link absolute (see opdsBaseURL) and appends the
+// configured API key, so pagination, subsection, and download links stay
+// authenticated and fully-qualified across clicks. An e-reader's OPDS
+// client has no way to log in and hold a session cookie - the key has to
+// travel in the URL itself, request to request. A path with no key
+// configured skips that part (matches authMiddleware's "open instance"
+// bypass for pure-LAN/no-auth setups), but still gets the base prepended.
+func opdsHref(path, apiKey, base string) string {
+	if base != "" && strings.HasPrefix(path, "/") {
+		path = base + path
+	}
 	if apiKey == "" {
 		return path
 	}
@@ -59,7 +90,7 @@ func opdsHref(path, apiKey string) string {
 	return path + sep + "apikey=" + url.QueryEscape(apiKey)
 }
 
-func opdsFeedOpen(feedID, title, kind, selfHref, apiKey string, total, page int) string {
+func opdsFeedOpen(feedID, title, kind, selfHref, apiKey, base string, total, page int) string {
 	mime := opdsNavMIME
 	if kind == "acquisition" {
 		mime = opdsAcqMIME
@@ -81,9 +112,9 @@ func opdsFeedOpen(feedID, title, kind, selfHref, apiKey string, total, page int)
   <opensearch:itemsPerPage>%d</opensearch:itemsPerPage>
   <opensearch:startIndex>%d</opensearch:startIndex>
 `, xmlEscape(feedID), xmlEscape(title), opdsNow(),
-		xmlEscape(opdsHref(selfHref, apiKey)), mime,
-		xmlEscape(opdsHref("/opds/", apiKey)), opdsNavMIME,
-		xmlEscape(opdsHref("/opds/opensearch.xml", apiKey)), opdsOSMIME,
+		xmlEscape(opdsHref(selfHref, apiKey, base)), mime,
+		xmlEscape(opdsHref("/opds/", apiKey, base)), opdsNavMIME,
+		xmlEscape(opdsHref("/opds/opensearch.xml", apiKey, base)), opdsOSMIME,
 		total, opdsPageSize, startIndex)
 }
 
@@ -99,21 +130,22 @@ func opdsNavEntry(entryID, title, content, href, mime string) string {
 		xmlEscape(content), xmlEscape(href), mime)
 }
 
-func (s *Server) handleOPDSRoot(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) handleOPDSRoot(w http.ResponseWriter, r *http.Request) {
 	totalBooks, _ := s.db.CountItems("ebook")
 	totalAudio, _ := s.db.CountItems("audiobook")
 	total := totalBooks + totalAudio
 	apiKey := s.cfg.APIKey
+	base := opdsBaseURL(r)
 
-	body := opdsFeedOpen("", "Librarr", "navigation", "/opds/", apiKey, total, 1)
+	body := opdsFeedOpen("", "Librarr", "navigation", "/opds/", apiKey, base, total, 1)
 	body += opdsNavEntry("library", fmt.Sprintf("My Library (%d items)", total),
-		"Browse your downloaded books and audiobooks", opdsHref("/opds/books", apiKey), opdsAcqMIME)
+		"Browse your downloaded books and audiobooks", opdsHref("/opds/books", apiKey, base), opdsAcqMIME)
 	body += opdsNavEntry("ebooks", fmt.Sprintf("Ebooks (%d)", totalBooks),
-		"Browse ebooks", opdsHref("/opds/books?type=ebook", apiKey), opdsAcqMIME)
+		"Browse ebooks", opdsHref("/opds/books?type=ebook", apiKey, base), opdsAcqMIME)
 	body += opdsNavEntry("audiobooks", fmt.Sprintf("Audiobooks (%d)", totalAudio),
-		"Browse audiobooks", opdsHref("/opds/books?type=audiobook", apiKey), opdsAcqMIME)
+		"Browse audiobooks", opdsHref("/opds/books?type=audiobook", apiKey, base), opdsAcqMIME)
 	body += opdsNavEntry("search", "Search",
-		"Search for new books", opdsHref("/opds/search?q={searchTerms}", apiKey), opdsAcqMIME)
+		"Search for new books", opdsHref("/opds/search?q={searchTerms}", apiKey, base), opdsAcqMIME)
 	body += "</feed>"
 
 	w.Header().Set("Content-Type", "application/atom+xml; charset=utf-8")
@@ -131,13 +163,14 @@ func (s *Server) handleOPDSBooks(w http.ResponseWriter, r *http.Request) {
 	items, _ := s.db.GetItems(mediaType, opdsPageSize, offset)
 	total, _ := s.db.CountItems(mediaType)
 	apiKey := s.cfg.APIKey
+	base := opdsBaseURL(r)
 
 	selfHref := fmt.Sprintf("/opds/books?page=%d", page)
 	if mediaType != "" {
 		selfHref += "&type=" + mediaType
 	}
 
-	body := opdsFeedOpen("library", "My Library", "acquisition", selfHref, apiKey, total, page)
+	body := opdsFeedOpen("library", "My Library", "acquisition", selfHref, apiKey, base, total, page)
 
 	// Pagination links.
 	if page > 1 {
@@ -146,7 +179,7 @@ func (s *Server) handleOPDSBooks(w http.ResponseWriter, r *http.Request) {
 			prevHref += "&type=" + mediaType
 		}
 		body += fmt.Sprintf("  <link rel=\"previous\" href=\"%s\" type=\"%s\"/>\n",
-			xmlEscape(opdsHref(prevHref, apiKey)), opdsAcqMIME)
+			xmlEscape(opdsHref(prevHref, apiKey, base)), opdsAcqMIME)
 	}
 	if offset+opdsPageSize < total {
 		nextHref := fmt.Sprintf("/opds/books?page=%d", page+1)
@@ -154,7 +187,7 @@ func (s *Server) handleOPDSBooks(w http.ResponseWriter, r *http.Request) {
 			nextHref += "&type=" + mediaType
 		}
 		body += fmt.Sprintf("  <link rel=\"next\" href=\"%s\" type=\"%s\"/>\n",
-			xmlEscape(opdsHref(nextHref, apiKey)), opdsAcqMIME)
+			xmlEscape(opdsHref(nextHref, apiKey, base)), opdsAcqMIME)
 	}
 
 	for _, item := range items {
@@ -186,7 +219,7 @@ func (s *Server) handleOPDSBooks(w http.ResponseWriter, r *http.Request) {
 `, xmlEscape(item.Title), item.ID,
 			item.AddedAt.UTC().Format("2006-01-02T15:04:05Z"),
 			authorXML, xmlEscape(mime),
-			xmlEscape(opdsHref(fmt.Sprintf("/opds/download/%d", item.ID), apiKey)), xmlEscape(mime))
+			xmlEscape(opdsHref(fmt.Sprintf("/opds/download/%d", item.ID), apiKey, base)), xmlEscape(mime))
 	}
 
 	body += "</feed>"
@@ -203,9 +236,10 @@ func (s *Server) handleOPDSSearch(w http.ResponseWriter, r *http.Request) {
 
 	results, _ := s.searchMgr.Search(r.Context(), "main", query)
 	apiKey := s.cfg.APIKey
+	base := opdsBaseURL(r)
 
 	body := opdsFeedOpen("search", fmt.Sprintf("Search: %s", query), "acquisition",
-		fmt.Sprintf("/opds/search?q=%s", xmlEscape(query)), apiKey, len(results), 1)
+		fmt.Sprintf("/opds/search?q=%s", xmlEscape(query)), apiKey, base, len(results), 1)
 
 	for i, r := range results {
 		if i >= 50 {
@@ -312,8 +346,8 @@ func (s *Server) handleOPDSDownload(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Item not found", http.StatusNotFound)
 }
 
-func (s *Server) handleOPDSOpenSearch(w http.ResponseWriter, _ *http.Request) {
-	template := opdsHref("/opds/search?q={searchTerms}", s.cfg.APIKey)
+func (s *Server) handleOPDSOpenSearch(w http.ResponseWriter, r *http.Request) {
+	template := opdsHref("/opds/search?q={searchTerms}", s.cfg.APIKey, opdsBaseURL(r))
 	xml := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
   <ShortName>Librarr</ShortName>

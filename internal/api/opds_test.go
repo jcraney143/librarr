@@ -1,6 +1,7 @@
 package api
 
 import (
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -40,7 +41,7 @@ func TestOpdsNow(t *testing.T) {
 }
 
 func TestOpdsFeedOpen(t *testing.T) {
-	result := opdsFeedOpen("test-id", "Test Feed", "navigation", "/opds/", "", 100, 1)
+	result := opdsFeedOpen("test-id", "Test Feed", "navigation", "/opds/", "", "", 100, 1)
 
 	if !strings.Contains(result, "urn:librarr:test-id") {
 		t.Error("expected feed ID in output")
@@ -57,7 +58,7 @@ func TestOpdsFeedOpen(t *testing.T) {
 }
 
 func TestOpdsFeedOpen_Page2(t *testing.T) {
-	result := opdsFeedOpen("id", "Feed", "acquisition", "/opds/books?page=2", "", 200, 2)
+	result := opdsFeedOpen("id", "Feed", "acquisition", "/opds/books?page=2", "", "", 200, 2)
 
 	expectedStartIndex := (2-1)*opdsPageSize + 1
 	if !strings.Contains(result, "<opensearch:startIndex>51</opensearch:startIndex>") {
@@ -77,6 +78,54 @@ func TestOpdsNavEntry(t *testing.T) {
 	if !strings.Contains(result, `href="/opds/books"`) {
 		t.Error("expected href in entry")
 	}
+}
+
+func TestOpdsHref(t *testing.T) {
+	tests := []struct {
+		name   string
+		path   string
+		apiKey string
+		base   string
+		want   string
+	}{
+		{"no key, no base", "/opds/books", "", "", "/opds/books"},
+		{"key, no base", "/opds/books", "secret", "", "/opds/books?apikey=secret"},
+		{"key, no base, existing query", "/opds/books?type=ebook", "secret", "", "/opds/books?type=ebook&apikey=secret"},
+		{"no key, with base", "/opds/books", "", "http://192.168.1.10:5050", "http://192.168.1.10:5050/opds/books"},
+		{"key and base", "/opds/books", "secret", "http://192.168.1.10:5050", "http://192.168.1.10:5050/opds/books?apikey=secret"},
+		{"key needing escaping", "/opds/books", "a b&c", "", "/opds/books?apikey=a+b%26c"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := opdsHref(tt.path, tt.apiKey, tt.base)
+			if got != tt.want {
+				t.Errorf("opdsHref(%q, %q, %q) = %q, want %q", tt.path, tt.apiKey, tt.base, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestOpdsBaseURL(t *testing.T) {
+	t.Run("plain HTTP request", func(t *testing.T) {
+		r := httptest.NewRequest("GET", "http://192.168.1.10:5050/opds/", nil)
+		if got := opdsBaseURL(r); got != "http://192.168.1.10:5050" {
+			t.Errorf("opdsBaseURL() = %q, want %q", got, "http://192.168.1.10:5050")
+		}
+	})
+
+	t.Run("behind a tunnel with X-Forwarded-Proto", func(t *testing.T) {
+		r := httptest.NewRequest("GET", "http://requests.example.com/opds/", nil)
+		r.Header.Set("X-Forwarded-Proto", "https")
+		if got := opdsBaseURL(r); got != "https://requests.example.com" {
+			t.Errorf("opdsBaseURL() = %q, want %q", got, "https://requests.example.com")
+		}
+	})
+
+	t.Run("nil request", func(t *testing.T) {
+		if got := opdsBaseURL(nil); got != "" {
+			t.Errorf("opdsBaseURL(nil) = %q, want empty string", got)
+		}
+	})
 }
 
 func TestFormatMIMEs(t *testing.T) {
